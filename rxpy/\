@@ -1,0 +1,10 @@
+def one():
+  pass
+
+def two():
+  pass
+
+import inspect, sys
+for key, val in dict(globals()).items():
+  print("{}{}".format(key, callable(val)))
+
