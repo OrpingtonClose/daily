@@ -353,6 +353,92 @@ def class_twentynine():
   go_go_go(3000)
   input("press to continue")
 
+def class_thirty():
+  import time
+  print("==================")
+  letters = Observable.from_(["alpha", "Beta", "Gamma", "Delta", "Epsilon"])
+  letters.subscribe(lambda x: print("first {}".format(x))) 
+  time.sleep(2)
+  letters.subscribe(lambda x: print("second {}".format(x))) 
+  print("==================")
+
+def class_thirtyone():
+  # both have seperate interval counters
+  import time
+  obs = Observable.interval(1000).publish()
+  obs.subscribe(lambda x: print("first {}".format(x))) 
+  obs.connect()
+  time.sleep(2)
+  obs.subscribe(lambda x: print("second {}".format(x))) 
+  input("press any key to continue")
+
+def class_thirtytwo():
+  # a single counter for all subscribers
+  import time
+  obs = Observable.interval(1000).publish().ref_count()
+  obs.subscribe(lambda x: print("first {}".format(x))) 
+  time.sleep(2)
+  obs.subscribe(lambda x: print("second {}".format(x))) 
+  input("press any key to continue\n")
+
+def class_thirtythree():
+  #same as Observable.interval(1000).publish().ref_count()
+  import time
+  obs = Observable.interval(1000).share()
+  obs.publish(lambda x: print("first {}".format(x)))
+  time.sleep(4)
+  obs.publish(lambda x: print("second {}".format(x)))
+
+def class_thirtyfour():
+  #schedulers
+  #ImmediateScheduler
+  #NewThreadScheduler
+  #ThreadPoolScheduler <--
+  #TimeoutScheduler
+  from rx.concurrency import ThreadPoolScheduler
+  import time
+  from threading import current_thread
+  import multiprocessing
+  import hashlib
+  from rx.internal import extensionmethod 
+
+  thread_count = multiprocessing.cpu_count() + 1
+  pool_scheduler = ThreadPoolScheduler(thread_count)
+
+  def intense_calculation(obs):
+    for n in range(500000):
+      _ = hashlib.sha256(str(n).encode()).hexdigest()
+    #time.sleep(4)
+    return obs 
+
+  @extensionmethod(Observable)
+  def apply_pool_scheduler(obs, boolean):
+    if boolean == True:
+      return obs.subscribe_on(pool_scheduler) 
+    else:
+      return obs 
+
+  def do_example(schedule):
+    start = time.perf_counter()
+    letters = Observable.from_(["alpha", "Beta", "Gamma", "Delta", "Epsilon"])
+    letters.map(intense_calculation)\
+           .apply_pool_scheduler(schedule)\
+           .subscribe(on_next=lambda s: print("process 1 {}".format(s))
+                     ,on_error=lambda s: print("error {}".format(s))
+                     ,on_completed=lambda: print("process 1 done, total time {}".format(time.perf_counter() - start))) 
+   
+    letters.map(intense_calculation)\
+           .apply_pool_scheduler(schedule)\
+           .subscribe(on_next=lambda s: print("process 2 {}".format(s))
+                     ,on_error=lambda s: print("error {}".format(s))
+                     ,on_completed=lambda: print("process 2 done, total time {}".format(time.perf_counter() - start))) 
+  
+  print("==== no schedule")
+  do_example(False) 
+  print("==== with schedule")
+  do_example(True) 
+  input("")
+ 
 if __name__ == "__main__":
   import os, re, sys, hashlib
   fits = []
