@@ -198,7 +198,7 @@ def class_twentyfive():
   temp.file.seek(0)
   # do something with the file 
 
-bservable.from_(["a", "b", "c", "d", "e", "f"])
+  Observable.from_(["a", "b", "c", "d", "e", "f"])
   numbers = Observable.range(1, 5)
   Observable.zip(letters, numbers, lambda l, n: "{} <===> {}".format(l, n)).subscribe(print)
 
@@ -223,26 +223,156 @@ def class_twentyfour():
 
 def class_twentyfive():
   import requests
-  text_request = requests.get("http://www.gutenberg.org/cache/epub/55506/pg55506.txt")
-  if text_request.ok == False:
-    print("request failed: {}".format(text_request.reason))
-    print("{}".format(text_request.url))
-    return
-
   from tempfile import NamedTemporaryFile
-  temp = NamedTemporaryFile()
-  temp.file.write(text_reqiest.content)
-  temp.file.seek(0)
-  # do something with the file
+  def observe_file(url):
+    text_request = requests.get(url)
+    if text_request.ok == False:
+      return Observable.throw("request failed: {}\n{}".format(text_request.reason,text_request.url))
+  
+    temp = NamedTemporaryFile(delete=False)
+    temp.file.write(text_request.content)
+    temp.close()
+    return Observable.from_(open(temp.name))\
+                     .map(lambda line: line.strip())\
+                     .filter(lambda l: l != "")
+
+  observe_file("http://www.gutenberg.org/cache/epub/55506/pg55506.txt").subscribe(print)
+  input("please press any key to end")
+  
+def class_twentysix():
+  from urllib.request import urlopen
+  Observable.from_(urlopen("http://www.gutenberg.org/cache/epub/55506/pg55506.txt"))\
+            .map(lambda l: l.decode("utf-8").strip())\
+            .subscribe(print)
+
+def class_twentyseven():
+  from tempfile import NamedTemporaryFile
+  import sqlite3
+  from sqlalchemy import create_engine, text
+
+  def get_words():
+    with open("/etc/dictionaries-common/words") as dictionary: 
+      for word in dictionary:
+        yield word
+
+  def get_insert_statements():
+    insert_template = "insert into words values({},'{}')"
+    for ordered_number, word in enumerate(get_words()):
+      escaped_word = word.replace("'", "''")  
+      yield insert_template.format(ordered_number, escaped_word)
+ 
+  db = NamedTemporaryFile(delete=False)
+  db.close()
+  sqlite_con = sqlite3.connect(db.name)
+  sqlite_con.execute("create table words(id int, word varchar)")
+  for insert in get_insert_statements():
+    sqlite_con.execute(insert)
+  sqlite_con.commit()
+  sqlite_con.close()
+
+  alch_engine = create_engine("sqlite:///{}".format(db.name))
+  alch_con = alch_engine.connect()
+
+  def get_all_words(sqlite_path):
+    stat = text("select * from words")
+    return Observable.from_(alch_con.execute(stat).fetchall())
+  
+  def get_words(sqlite_path, ids):
+    stat = text("select * from words where id = :id")
+    return Observable.from_(ids)\
+                     .flat_map(lambda id: Observable.from_(alch_con.execute(stat, id=id)))
+  print('if hasattr(class_twentyseven, "next") == False:')
+  if hasattr(class_twentyseven, "next") == False:
+    print('get_all_words(db.name).subscribe(print)')
+    get_all_words(db.name).subscribe(print)
+    input("please press any key to finish")
+  else:
+    print('return lambda ids: get_words(db.name, ids)')
+    return lambda ids: get_words(db.name, ids)
+
+def class_twentyeight():
+  class_twentyseven.__dict__["next"] = True
+  class_twentyseven()([33, 44, 1]).subscribe(print)
+  del class_twentyseven.next
+
+def github_three():
+  from rx.testing import marbles
+  xs = Observable.from_marbles("a-b-c-|")
+  print(xs.to_blocking().to_marbles())
+
+def github_four():
+  from rx.testing import marbles
+  for marble_string in ["1-2-3-x-5", "1-2-3-4-5"]:
+    print("marble_string {}".format(marble_string))
+    xs = Observable.from_marbles(marble_string)
+    print(xs.to_blocking().to_marbles())
+
+def github_five():
+  from rx.testing import marbles
+
+  def test_marbles(marble_list, continuation_fun):
+    obs = Observable.from_(marble_list)\
+                    .map(lambda m: Observable.from_marbles(m))
+    result = continuation_fun(obs).to_blocking()\
+                                  .to_marbles()
+    for marble in marble_list:
+      print(marble)
+    print(result)
+
+  marble_list = ["1-2-3---4-5", "1-2-3-4-5"]
+  print("concat_all") 
+  test_marbles(marble_list, lambda o: o.concat_all())
+  print("merge_all")
+  test_marbles(marble_list, lambda o: o.merge_all())
+
+def class_twentynine():
+  import re
+  def words_from_file(file_name):
+    file = open(file_name)
+    return Observable.from_(file)\
+                     .map(lambda word: re.sub(r"\W", " ", word))\
+                     .flat_map(lambda line: Observable.from_(line.split(" ")))\
+                     .filter(lambda w: w != "")\
+                     .map(lambda word: word.lower())
+
+  def word_counter(file_name):
+    return words_from_file(file_name).group_by(lambda x: x)\
+                                     .flat_map(lambda o: o.count()\
+                                                          .map(lambda c: (o.key, c)))\
+                                     .to_dict(lambda t: t[0], lambda t: t[1])
+
+  def go_go_go(interval):
+    import os
+    current_module_path = os.path.abspath(__file__)
+  
+    Observable.interval(interval)\
+              .flat_map(lambda i: word_counter(current_module_path))\
+              .distinct_until_changed()\
+              .subscribe(print)
+
+  go_go_go(3000)
+  input("press to continue")
 
 if __name__ == "__main__":
-  class_twentyfour()
-
-
-
-A
-
-  class_twentyfour()
-
-
-
+  import os, re, sys, hashlib
+  fits = []
+  with open(os.path.abspath(__file__)) as this_file:
+    for line in this_file:
+      line_splat = line.split(" ")
+      if line_splat[0] == "def":
+        fun_in_file = line_splat[1].split("(")[0]
+        candidate = sys.argv[1] if len(sys.argv) > 1 else "" 
+        hash_head = hashlib.md5(fun_in_file.encode()).hexdigest()[:6]
+        if candidate in fun_in_file or candidate in hash_head:
+          fits += [(fun_in_file, hash_head)]
+    if len(fits) == 1:
+      to_exec = fits[0][0]
+      envelope = "{}{} {}{}".format("="*8, fits[0][0], fits[0][1], "="*8)
+      print(envelope)
+      eval(to_exec)()
+      print(envelope)
+    else:
+      for fit in sorted(fits, key=lambda t: t[0]):
+        print("{} {}".format(*fit))
+ 
+#  class_twentynine()
