@@ -439,6 +439,18 @@ def class_thirtyfour():
   do_example(True) 
   input("")
  
+def class_thirtyfive():
+  from rx.concurrency import ThreadPoolScheduler
+  from threading import current_thread
+  import multiprocessing, time, random, hashlib
+  
+  def intense_calculation(obs):
+    for n in range(100000):
+      _ = hashlib.sha256(str(n).encode()).hexdigest() 
+
+  THREAD_COUNT = multiprocessing.cpu_count() + 1
+  pool_scheduler = ThreadPoolScheduler(THREAD_COUNT)
+
 if __name__ == "__main__":
   import os, re, sys, hashlib
   fits = []
