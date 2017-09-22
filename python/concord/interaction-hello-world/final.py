@@ -17,17 +17,18 @@ class Final(Computation):
         self.concord_logger.info("Source destroyed")
 
     def process_timer(self, ctx, key, timer):
-        self.concord_logger.info("process timer")
+        pass
 
     def process_record(self, ctx, record):
         self.concord_logger.info("process record")
-        #self.concord_logger.info("{}{}".format(record.key, repr(dir(record))))
+        self.concord_logger.info("=====================")
+        for key, val in record.__dict__.items():
+            self.concord_logger.info("{}:{}".format(key, val))
 
     def metadata(self):
         return Metadata(
             name='final',
-            istreams=["outstream", StreamGrouping.GROUP_BY],
+            istreams=[("outstream", StreamGrouping.GROUP_BY)],
             ostreams=[])
 
 serve_computation(Final())
-
