@@ -1,0 +1,10 @@
+{
+  "zookeeper_hosts": "localhost:2181",
+  "zookeeper_path": "/concord",
+  "executable_arguments": ["something.py"],
+  "executable_name": "runner.bash",
+  "compress_files": ["something.py", "runner.bash"],
+  "computation_name": "something",
+  "mem": 512,
+  "cpus": 1.0
+}
