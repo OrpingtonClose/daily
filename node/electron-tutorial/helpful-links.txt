@@ -1,0 +1,5 @@
+https://www.safaribooksonline.com/library/view/cross-platform-desktop-applications/9781617292842/kindle_split_014.html
+https://dzone.com/articles/build-desktop-apps-using-electron-the-beginners-gu
+https://medium.com/developers-writing/building-a-desktop-application-with-electron-204203eeb658
+https://medium.com/developers-writing/building-a-desktop-application-with-electron-204203eeb658
+https://github.com/garciadelcastillo/electron-p5js-quick-start
