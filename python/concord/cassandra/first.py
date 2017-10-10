@@ -2,6 +2,8 @@ import sys
 import concord
 import time
 import json
+import hashlib
+from datetime import datetime
 from concord.computation import (
     Computation,
     Metadata,
@@ -26,7 +28,8 @@ class First(Computation):
 
     def process_timer(self, ctx, key, timer):
         self.concord_logger.info("process timer")
-        ctx.produce_record("outstream", "hello world", json.dumps({"value":{"field1":"val"}})
+        key = hashlib.sha512(datetime.datetime.now().isoformat()).hexdigest()
+        ctx.produce_record("outstream", "hello world", json.dumps({"value":{"key":key, "value":"something"}})
         new_time(ctx, 3000)
 
     def process_record(self, ctx, record):
