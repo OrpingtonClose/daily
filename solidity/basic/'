@@ -1,0 +1,73 @@
+pragma solidity ^0.4.13;
+
+import "./owned.sol";
+import "./FixedSupplyToken.sol";
+
+contract Exchange is owned {
+  struct Offer {
+    uint amount;
+    address who;
+  }
+  struct OrderBook {
+    uint highestPrice;
+    uint lowestPrice;
+    mapping (uint => Offer) offers;
+    uint offers_key;
+    uint offers_length;
+  }
+  struct Token {
+    address tokenContract;
+    string symbolName;
+    mapping (uint => OrderBook) buyBook;
+    uint curBuyPrice;
+    uint lowestBuyPrice;
+    uint amountBuyPrices;
+
+    mapping (uint => OrderBook) sellBook;
+    uint curSellPrice;
+    uint highestSellPrice;
+    uint amountSellPrices;
+  }
+
+  mapping (uint8 => Token) tokens;
+  uint8 symbolNameIndex;
+
+  mapping (address => mapping (uint8 => uint)) tokenBalanceForAddress;
+  mapping (address => uint) balanceEthForAddress;
+
+  function depositEther() payable {
+  }
+  function withdrawEther(uint amountInWei) {
+  }
+  function getEthBalanceInWei() constant returns (uint) {
+  }
+
+  function addToken(string symbolName, address erc20TokenAddress) onlyowner {
+  }
+  function hasToken(string symbolName) constant returns (bool) {
+  }
+  function getSymbolIndex(string symbolName) internal returns (uint8) {
+  }
+
+  function stringsEqual(string storage _a, string memory _b) internal returns (bool) {
+    bytes storage a = bytes(_a);
+    bytes storage b = bytes(_b);
+
+  function depositToken(string symbolName, uint amount) {
+  }
+  function withdrawToken(string symbolName, uint amount) {
+  }
+  function getBalance(string symbolName) constant returns (uint) {
+  }
+
+  function getBuyOrderBook(string symbolName) constant returns (uint[], uint[]) {
+  }
+  function getSellOrderBook(string symbolName) constant returns (uint[], uint[]) {
+  }
+  function buyToken(string symbolName, uint priceInWei, uint amount) {
+  }
+  function sellToken(string symbolName, uint priceInWei, uint amount) {
+  }
+  function cancelOrder(string symbolName, bool isSellOrder, uint priceInWei, uint offerKey) {
+  }
+}
