@@ -1,4 +1,5 @@
 var fixed_supply_token = artifacts.require("./FixedSupplyToken.sol");
+var exchange = artifacts.require("./Exchange.sol");
 
 contract('MyToken', function(accounts) {
   it("adds to numbers together", function() {
@@ -63,5 +64,79 @@ contract('MyToken', function(accounts) {
       //assert(_instance.getBalance().toNumber(), 10000, "one wei was sent");
     });
   });
-});
+
+  it("should be able to send all coins from one account and back again without losing anything", function() {
+    var _instance;
+    var _account_owner = accounts[0];
+    var _account_not_owner = accounts[1];
+    var _owner_starting_balance;
+    return fixed_supply_token.deployed().then(function(instance) {
+      _instance = instance;
+      return _instance.balanceOf.call(_account_owner);
+    }).then(function(balance_owner) {
+      _owner_starting_balance = balance_owner;
+      return _instance.transfer(_account_not_owner, _owner_starting_balance, {from: _account_owner});
+    }).then(function(receipt) {
+      return _instance.transfer(_account_owner, _owner_starting_balance, {from: _account_not_owner});
+    }).then(function(receipt) {
+      return _instance.balanceOf.call(_account_owner);
+    }).then(function(owner_balance_after_exchange) {
+      assert.equal(owner_balance_after_exchange.toNumber(), _owner_starting_balance.toNumber());
+    });
+  });
+ 
+  it("should be able to deposit ether", function() {
+    var _instance;
+    return fixed_supply_token.deployed().then(function(instance) {
+      _instance = instance;
+      return _instance.send(web3.toWei(1, "ether"), {from: accounts[0]});
+    }).then(function(receipt) {
+      return web3.eth.getBalance(_instance.address);
+    }).then(function(balance) {
+      assert.equal(balance.toNumber(), web3.toWei(1, "ether"));
+    });
+  });
+
+  it( "should be able to deposit and withdraw ether to and from the exchange", function(  ) {
+    var _instance;
+    var amount_to_transfer;
+    var declared_gas_cost;
+    var balance_owner_start;
+    var balance_owner_end;
+    var balance_receiver_end;
+
+    return exchange.deployed(  ).then( function( instance ) {
+      _instance = instance;
+      return web3.toWei( 1, "ether" );
+
+    } ).then(  function(  to_transfer )  {
+      amount_to_transfer = to_transfer;
+      return web3.eth.getBalance( accounts[0] );
+
+    } ).then( function( balance ) {
+      balance_owner_start = balance;
+      return _instance.depositEther( {from: accounts[0], value: amount_to_transfer} );
+
+    } ).then( function( transaction_hash ) {
+      declared_gas_cost = transaction_hash.receipt.cumulativeGasUsed.toString();
+      return web3.eth.getBalance( accounts[0] );
+
+    } ).then( function( balance ) {
+      balance_owner_end = balance;
+      return web3.eth.getBalance( accounts[1] );
+
+    } ).then( function( balance ) {
+      balance_receiver_end = balance;
+      var new_balance_plus_transfer = balance_owner_end.plus( amount_to_transfer ); 
+      var cost_of_gas = balance_owner_start.minus( new_balance_plus_transfer );
+      var total_sent = balance_owner_end.minus(balance_owner_start);
+      var digits_gas_cost = cost_of_gas.toString().length;
+      var digits_to_append = digits_gas_cost - declared_gas_cost.length;
+      var corrected_declared_gas_cost = declared_gas_cost + "0".repeat(digits_to_append);
+      var new_balance_and_gas = balance_receiver_end.minus(Number(corrected_declared_gas_cost));
+      var corrected_old_balance = balance_owner_end.plus(Number(corrected_declared_gas_cost));
+      assert(new_balance_and_gas.equals(corrected_old_balance), new_balance_and_gas.toString() + " " + corrected_old_balance.toString());
+    } );
+  } );
+} );
  
