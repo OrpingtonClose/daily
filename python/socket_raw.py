@@ -46,6 +46,16 @@ def ip_address_formats():
   print("hexlify(packed) ---> {}".format(hexlify(packed)))
   print("unpacked ---> {}".format(unpacked))
 
+def get_timeout():
+  import socket
+  ip4_address_family = socket.AF_INET
+  tcp = socket.SOCK_STREAM
+  udp = socket.SOCK_DGRAM
+  s = socket.socket(ip4_address_family, tcp)
+  print("timeout is {}".format(s.gettimeout()))
+  s.settimeout(100)
+  print("timeout is {}".format(s.gettimeout()))
+
 def get_port_services():
   #https://www.safaribooksonline.com/library/view/python-network-programming/9781786463999/62dbebcd-509c-4b04-9455-c25ec03398e9.xhtml
   import socket
@@ -56,8 +66,79 @@ def get_port_services():
     except:
       pass
 
+def socket_errors():
+  #https://www.safaribooksonline.com/library/view/python-network-programming/9781786463999/57b98da2-c312-4952-a2b8-e09b845c454b.xhtml
+
+  #### usage:
+  #python3 % --host=www.python.org --port=80 --file=%
+
+  import sys, socket, argparse
+  parser = argparse.ArgumentParser(description="attempting to connect to sockets with full socket module error suite")
+  parser.add_argument("--host", action="store", dest="host", required=False)
+  parser.add_argument("--port", action="store", dest="port", type=int, required=False)
+  parser.add_argument("--file", action="store", dest="file", required=False)
+  given_args = parser.parse_args()
+  host = given_args.host
+  port = given_args.port
+  filename = given_args.file
+  if not host or not port or not filename:
+    from subprocess import call
+    result = call(["python3", __file__, 
+                   "--host", "docs.microsoft.com", #"www.python.org", 
+                   "--port", "443", 
+                   "--file", "/en-us/windows-hardware/drivers/network/af-inet"])
+    sys.exit(result)
+    
+  try:
+    import ssl
+    insecure_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s = ssl.wrap_socket(insecure_socket, ssl_version=ssl.PROTOCOL_TLSv1)
+  except socket.error as e:
+    print("#######Error creating socket: {}".format(repr(e)))
+    sys.exit(1)
+  except Exception as e:
+    print("#######regular error {}".format(str(e)))
+    sys.exit(1)
+
+  try:
+    s.connect((host, port))
+  except socket.gaierror as e:
+    print("#######Address wrong {}".format(str(e)))
+    sys.exit(1)
+  except socket.error as e:
+    print("#######connection error {}".format(str(e)))
+  except Exception as e:
+    print("#######regular error {}".format(str(e)))
+    sys.exit(1)
+
+  try:
+    msg = "GET {} HTTP/1.1\r\nHost: {}\r\n\r\n".format(filename, host)
+    print("><=><=><=><=><=><=><=><=><=><=><=><=><=><=><")
+    print(msg)
+    s.sendall(msg.encode('utf-8'))
+  except socket.error as e:
+    print("#######error sending data {}".format(str(e)))
+  except Exception as e:
+    print("#######regular error {}".format(str(e)))
+    sys.exit(1)
+
+  while 1:
+    try:
+      buf = s.recv(2048)
+    except socket.error as e:
+      print("#######error receiving data {}".format(str(e)))
+      sys.exit(1)
+    except Exception as e:
+      print("#######regular error {}".format(str(e)))
+      sys.exit(1)
+    if len(buf) != 0:
+      print("><=><=><=><=><=><=><=><=><=><=><=><=><=><=><")
+      sys.stdout.write(buf.decode('utf-8'))
+      break
+
 if __name__ == '__main__':
   #socket_raw()
   #gethostname()
   #ip_address_formats()
-  get_port_services()
+  #get_port_services()
+  socket_errors()
