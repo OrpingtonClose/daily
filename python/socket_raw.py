@@ -124,7 +124,15 @@ def socket_errors():
 
   while 1:
     try:
-      buf = s.recv(2048)
+      #https://www.safaribooksonline.com/library/view/linux-socket-programming/0672319357/apa.html
+      general_socket_options = socket.SOL_SOCKET
+      receive_buffer_size = socket.SO_RCVBUF
+      bufsize = s.getsockopt(general_socket_options, receive_buffer_size)
+      print("#######buffer size is {}".format(bufsize))
+      s.setsockopt(general_socket_options, receive_buffer_size, 400000)
+      bufsize = s.getsockopt(general_socket_options, receive_buffer_size)
+      print("#######buffer size is {}".format(bufsize))
+      buf = s.recv(bufsize)
     except socket.error as e:
       print("#######error receiving data {}".format(str(e)))
       sys.exit(1)
@@ -133,7 +141,7 @@ def socket_errors():
       sys.exit(1)
     if len(buf) != 0:
       print("><=><=><=><=><=><=><=><=><=><=><=><=><=><=><")
-      sys.stdout.write(buf.decode('utf-8'))
+      sys.stdout.write(str(len(buf.decode('utf-8'))))
       break
 
 if __name__ == '__main__':
