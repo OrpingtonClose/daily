@@ -46,16 +46,6 @@ def ip_address_formats():
   print("hexlify(packed) ---> {}".format(hexlify(packed)))
   print("unpacked ---> {}".format(unpacked))
 
-def get_timeout():
-  import socket
-  ip4_address_family = socket.AF_INET
-  tcp = socket.SOCK_STREAM
-  udp = socket.SOCK_DGRAM
-  s = socket.socket(ip4_address_family, tcp)
-  print("timeout is {}".format(s.gettimeout()))
-  s.settimeout(100)
-  print("timeout is {}".format(s.gettimeout()))
-
 def get_port_services():
   #https://www.safaribooksonline.com/library/view/python-network-programming/9781786463999/62dbebcd-509c-4b04-9455-c25ec03398e9.xhtml
   import socket
@@ -66,6 +56,7 @@ def get_port_services():
     except:
       pass
 
+<<<<<<< HEAD
 def socket_errors():
   #https://www.safaribooksonline.com/library/view/python-network-programming/9781786463999/57b98da2-c312-4952-a2b8-e09b845c454b.xhtml
 
@@ -144,9 +135,10 @@ def socket_errors():
       sys.stdout.write(str(len(buf.decode('utf-8'))))
       break
 
+=======
+>>>>>>> parent of 73e1d37... socket error messages; https with sockets
 if __name__ == '__main__':
   #socket_raw()
   #gethostname()
   #ip_address_formats()
-  #get_port_services()
-  socket_errors()
+  get_port_services()
