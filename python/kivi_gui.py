@@ -1,4 +1,4 @@
-#sudo add-apt-repository ppa:kivy- team/kivy
+#sudo add-apt-repository ppa:kivy-team/kivy
 #sudo apt-get update
 #sudo apt-get install python3-kivy
 #sudo -H pip3 install cython==0.23
@@ -13,6 +13,15 @@
 #make
 #export PYTHONPATH=~/code/kivy:$PYTHONPATH
 #DOESNT WORK IN UBUNTU 17 AS WELL AS IT SHOULD, which means not at all
+"""
+some python versions are compiled with the the flag --with-fpectl
+cython somehow is sensitive to this setting
+the solution was here:
+https://github.com/pytoolz/cytoolz/issues/120
+
+sudo -H pip3 install --no-cache-dir pygame
+sudo -H pip3 install --no-cache-dir kivy
+"""
 
 import kivy
 kivy.require('1.9.0')
