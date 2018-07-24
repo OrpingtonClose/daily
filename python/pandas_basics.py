@@ -1,4 +1,5 @@
 #http://dataconomy.com/2015/03/14-best-python-pandas-features/
+#https://www.safaribooksonline.com/library/view/pandas-for-everyone/9780134547046/ch10.xhtml
 import pytest, pandas as pd
 
 @pytest.fixture
@@ -105,15 +106,84 @@ def test_crosstab_2():
   with pytest.raises(KeyError):
     dump = cross_df.loc[33]
 
-#print(s1.index)
-#s1.index = ['a', 'b', 'c', 'd']
-#print(s1.index)
-#print(s1['d'])
-#data = {'Names':['John', 'Ryan', 'Emily'],
-#        'Standard': [7, 8, 9], 
-#        'Subject': ['English', 'Math', 'Science']}
-#df = pd.DataFrame(data, index=['s1', 's2', 's3'],
-#                        columns=['Names', 'Standard', 'Subject'])
-#print(df)
-#print(df.Names)
-#
+def test_describe_stats_made():
+  d = pd.Series([1]*10).describe()
+  assert all(d.index == ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max'])
+
+def test_stats_describe_values():
+  d = pd.Series([1]*10).describe()
+  assert d['count'] == 10.0
+  assert d['mean'] == 1.0
+  assert d['std'] == 0.0
+  assert d['min'] == 1.0
+  assert d['25%'] == 1.0
+  assert d['50%'] == 1.0
+  assert d['75%'] == 1.0
+  assert d['max'] == 1.0
+
+def test_basic_groupby():
+  df = pd.DataFrame([1, 1, 1, 3, 5, 6, 7, 1, 1]).groupby(0)[0].count()
+  assert df[1] == 5
+  assert df[3] == 1
+  assert df[5] == 1
+  assert df[6] == 1
+  assert df[7] == 1
+
+def test_groupby_regular(df):
+  assert all(df.groupby('Age').Subject.sum() == ['EnglishMath', 'Science'])
+
+def test_groupby_agg(df):
+  import numpy as np
+  aggrs = {'Names': ['count', 'sum', np.max]}
+  grouped = df.groupby('Age').agg(aggrs)
+  names = grouped['Names']
+  assert names['count'].loc[25] == 2
+  assert names['count'].loc[27] == 1
+  assert names['sum'].loc[25] == 'JohnRyan'
+  assert names['sum'].loc[27] == 'Emily'
+  assert names['amax'].loc[25] == 'Ryan'
+  assert names['amax'].loc[27] == 'Emily'
+  
+def test_pandas_join():
+  #along indices
+  import operator
+  left_data = pd.DataFrame({'name': ['john', 'marge'], 
+                            'age':[25, 27]})
+  right_data = pd.DataFrame({'name': ['john', 'marge', 'marge'], 
+                             'possesions': ['dog', 'cider', 'chair']})
+  left = left_data.set_index('name')
+  right = right_data.set_index('name')
+
+  result = {'age': {'john': 25, 
+                    'marge': 27}, 
+            'possesions': {'john': 'dog', 
+                           'marge': 'chair'}}
+  assert left.join(right).to_dict() == result
+
+def test_pandas_merge():
+  #not based on indices
+  left = pd.DataFrame({ 'name':       ['john', 'marge'], 
+                        'age':        [25, 27]})
+  right = pd.DataFrame({'name':       ['john', 'marge', 'marge'], 
+                        'possesions': ['dog', 'cider', 'chair']})
+  result = {'age': { 0: 25, 1: 27, 2: 27 },
+            'name': { 0: 'john', 1: 'marge', 2: 'marge' },
+            'possesions': { 0: 'dog', 1: 'cider', 2: 'chair' }}
+  assert left.merge(right, on='name').to_dict() == result
+
+#https://github.com/jakevdp/PythonDataScienceHandbook/blob/46cfb1c8b28edcdf543b4aabd59c0d5b7202236b/notebooks/03.04-Missing-Values.ipynb
+def test_masking():
+  import numpy as np
+  data = pd.Series([1, np.nan, 'Hello', None])
+  data_no_nulls = data[data.notnull()]
+  assert data_no_nulls[0] == 1
+  assert data_no_nulls[2] == 'Hello'
+
+def test_fillna():
+  import numpy as np
+  data = pd.Series([1, np.nan, 'Hello', None])  
+  filled = data.fillna('something')
+  assert filled[0] == 1
+  assert filled[1] == 'something'
+  assert filled[2] == 'Hello'
+  assert filled[3] == 'something'
