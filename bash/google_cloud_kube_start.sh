@@ -6,5 +6,35 @@ sudo apt-get install google-cloud-sdk
 gcloud auth login
 gcloud config set project $(gcloud projects list | awk 'NF=1 && FNR==2')
 gcloud container clusters create kubia --machine-type f1-micro --num-nodes 2 --zone europe-west1
-gcloud container clusters delete $(gcloud container clusters list | awk 'NF=1 && FNR==2') --region $(gcloud container clusters list | awk 'FNR==2 {print $2}')
 
+#get all nodes in a cluster
+kubectl get nodes
+
+NODE=$(kubectl get nodes | awk 'NF = 1 && FNR==2')
+
+#ssh into node
+gcloud compute ssh $NODE
+
+#get node info
+kubectl describe node $NODE
+
+#tab completion
+source <(kubectl completion bash)
+#with alias for kubectl
+source <(kubectl completion bash | sed s/kubectl/k/g)
+
+#run container on                                      ReplicationController
+kubectl run kubia --image=orpington/kubia --port=8080  --generator=run/v1
+
+#open replicationcontroller externally
+kubectl expose rc kubia --type=LoadBalancer --name=kubia-http
+
+kubectl get replicationcontrollers
+
+kubectl scale rc kubia --replicas=3
+
+kubectl cluster-info
+gcloud container clusters describe kubia
+#gcloud container clusters delete $(gcloud container clusters list | awk 'NF=1 && FNR==2') --region $(gcloud container clusters list | awk 'FNR==2 {print $2}')
+
+#failure. couldn't get the node app to work
