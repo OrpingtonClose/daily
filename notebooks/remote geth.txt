@@ -1,0 +1,49 @@
+ssh orpington@40.121.106.111
+[Unit]
+Description=geth full node
+After=network.target
+After=syslog.target
+
+[Install]
+WantedBy=multi-user.target
+ExecStart=/usr/bin/geth --cache=4096
+
+
+ssh -C2qTnNf -D 9876 sshuser@clustername-ssh.azurehdinsight.net
+
+ssh -C2qTnNf orpington@40.121.106.111 -L 8540:40.121.106.111:80
+#-L local-port:host:remote-port
+ssh -f user@personal-server.com -L 2000:personal-server.com:25 -N
+
+
+http://127.0.0.1:8545   
+
+#mist --rpc http://localhost:8540
+
+mist --rpc http://localhost:8540
+
+sudo sshfs -o allow_other,defer_permissions orpington@40.121.106.111:/ geth-remote
+sudo sshfs -o IdentityFile=~/.ssh/id_rsa orpington@40.121.106.111:/ geth-remote
+#https://www.digitalocean.com/community/tutorials/how-to-use-sshfs-to-mount-remote-file-systems-over-ssh
+ssh -C2qTnNf orpington@40.121.106.111 -L 8540:localhost:80
+ps aux | grep ssh | grep C2 | awk '{print $2}' | xargs -n 1 kill
+
+#https://nuclearcryptobuddha.blog/2017/06/how-to-send-receive-and-check-balance-of-erc20-tokens-using-geth/
+#https://docs.microsoft.com/en-us/azure/virtual-machines/linux/attach-disk-portal
+
+ssh orpington@40.121.106.111
+journalctl -u geth -f
+sudo geth --rpc --rpcport=80
+
+
+ps aux | grep ssh | grep C2 | awk '{print $2}' | xargs -n 1 kill
+ssh -C2qTnNf orpington@40.121.106.111 -L 8540:localhost:80
+nmap localhost -p8540
+sudo geth attach rpc:http://localhost:8540
+
+mist --rpc http://localhost:8540
+
+
+
+
+
