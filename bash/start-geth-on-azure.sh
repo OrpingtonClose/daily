@@ -20,9 +20,13 @@ After=syslog.target
 WantedBy=multi-user.target
 
 [Service]
-ExecStart=/usr/bin/geth --testnet --cache=4096 --verbosity=5
+ExecStart=/usr/bin/geth --rpc --rpcport "8545" --rpcaddr "127.0.0.1" --rpccorsdomain "*" --testnet --cache=4096 --verbosity=5
 EOF
 
 systemctl start geth-testnet
 
 journalctl -u geth-testnet -f
+
+#return to origin machine
+ssh -f -N -L 9545:localhost:8545 orpington@40.127.106.43
+curl -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":67}' http://127.0.0.1:9545
