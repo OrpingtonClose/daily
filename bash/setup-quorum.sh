@@ -127,9 +127,25 @@ do
 done
 
 
-for n in {1..1}
+for n in {1..4}
 do 
    QUORUM_NODE=$RAFT/cnode_data/cnode$n   
-   xterm -T "quorum geth $n" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --rpc --verbosity 2 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --ipcpath \"$QUORUM_NODE/geth.ipc\"" &
+   xterm -T "quorum geth $n" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --verbosity 2 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --ipcpath \"$QUORUM_NODE/geth.ipc\"" &
    #cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --verbosity 4 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --ipcpath "$QUORUM_NODE/geth.ipc"
 done
+
+cp $RAFT/accounts/keystore/* $QUORUM_NODE/keystore/
+mist --rpc=$QUORUM_NODE/geth.ipc --gethpath=$RAFT/geth
+
+f941a5bf5806bd5d2fce6c271e63e5a9e8927fe4
+
+yes "" | $RAFT/geth --datadir $RAFT/accounts account new
+
+Private key: 0x1f01c0930df479da4aec796d149c8be2620a745853f2c49e677000e558d42080
+Public key:  9cb911d5d31cb966706d3764892ed2d4b7ed34cf6e7e4f365a260532e6aacc39d85ae652d62f6139a128a8da81c66531740228c9d8b29f94e5ed9efc31a764fd
+Address:     0x3223f261cf7d8bb13a63a348cd40d32427399693
+
+$RAFT/geth --datadir $RAFT/accounts account import <(echo 1f01c0930df479da4aec796d149c8be2620a745853f2c49e677000e558d42080)
+$RAFT/geth --ipcpath=$QUORUM_NODE/geth.ipc --datadir $QUORUM_NODE attach
+
+echo $QUORUM_NODE/geth.ipc
