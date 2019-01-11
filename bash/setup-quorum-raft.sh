@@ -31,7 +31,7 @@ stack setup
 
 cd $BASEDIR
 git clone https://github.com/jpmorganchase/constellation.git
-cd cd $BASEDIR/constellation
+cd $BASEDIR/constellation
 stack install
 
 cp ~/.local/bin/constellation-node $RAFT/
@@ -47,6 +47,7 @@ yes "" | ./constellation-node --generatekeys=cnode4
 declare -a OTHER=(2 3 4)
 declare -a BROADCAST=(1)
 
+#constellation configuration files
 cd $BASEDIR
 for n in {1..4}; do
   if [ "$n" -eq "1" ]; then
@@ -76,7 +77,7 @@ do $RAFT/bootnode -genkey $BASEDIR/enode_id_$n #| tee /dev/fd/2 | sh
 done
 
 echo [ > $BASEDIR/static-nodes.json
-for n in {1..4}
+for n in {2..4}
 do  echo ===================================
     cat $BASEDIR/enode_id_$n
     echo
@@ -85,15 +86,16 @@ do  echo ===================================
 done
 CONTENT=$(head -n -1 $BASEDIR/static-nodes.json)]
 
-for n in {1..4}
+for n in {2..4}
 do echo ${CONTENT} > $RAFT/cnode_data/cnode$n/static-nodes.json
 done
 
 #create account
 mkdir $RAFT/accounts
 rm $RAFT/accounts/keystore/*
-yes "" | $RAFT/geth --datadir $RAFT/accounts account new
-ADDRESS=$(ls $RAFT/accounts/keystore | rev | cut -c 1-40 | rev)
+PRIVKEY=$(openssl ecparam -name secp256k1 -genkey -noout | openssl ec -text -noout 2> /dev/null | grep priv -A 3 | tail -n -3 | tr -d '\n[:space:]:' | sed 's/^00//')
+yes "" | $RAFT/geth --datadir $RAFT/accounts account import <(echo $PRIVKEY)
+ADDRESS=$(ls $RAFT/accounts/keystore | head -1 | rev | cut -c 1-40 | rev)
 mv $RAFT/accounts/keystore/* $RAFT/accounts/keystore/key1
 
 #https://github.com/jpmorganchase/quorum-examples/blob/master/examples/7nodes/genesis.json
@@ -104,11 +106,11 @@ cat - | jq ".alloc = {\"0x$ADDRESS\":{\"balance\":\"1000000000000000000000000000
   "config": {
     "homesteadBlock": 0
   },
-  "difficulty": "0x0",
+  "difficulty": "0x00",
   "extraData": "0x",
   "gasLimit": "0x7FFFFFFFFFFFFFFF",
   "mixhash": "0x00000000000000000000000000000000000000647572616c65787365646c6578",
-  "nonce": "0x0",
+  "nonce": "0x00",
   "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
   "timestamp": "0x00"
 }
@@ -120,32 +122,42 @@ do
    QUORUM_NODE=$RAFT/cnode_data/cnode$n
    rm -rf $QUORUM_NODE/{keystore,geth}
    echo mkdir -p $QUORUM_NODE/{keystore,geth} | tee /dev/fd/2 | sh
-   #echo cp $RAFT/genesis.json $QUORUM_NODE/  | tee /dev/fd/2 | sh
    echo cp $RAFT/accounts/keystore/key1 $QUORUM_NODE/keystore/  | tee /dev/fd/2 | sh
    echo cp $BASEDIR/enode_id_$n $QUORUM_NODE/geth/nodekey | tee /dev/fd/2 | sh
    echo $RAFT/geth --datadir $QUORUM_NODE init $RAFT/genesis.json | tee /dev/fd/2 | sh
 done
 
-
-for n in {1..4}
+#first node to be dynamically added to the network
+for n in {2..4}
 do 
+   n_to_add=1
+   DYNAMICALLY_ADDED_ENODE=$(echo \"enode://$($RAFT/bootnode -nodekey $BASEDIR/enode_id_$n_to_add -writeaddress)@127.0.0.1:2300$n_to_add?raftport=2100$n_to_add\")
    QUORUM_NODE=$RAFT/cnode_data/cnode$n   
-   xterm -T "quorum geth $n" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --verbosity 2 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --ipcpath \"$QUORUM_NODE/geth.ipc\"" &
-   #cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --verbosity 4 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --ipcpath "$QUORUM_NODE/geth.ipc"
+   xterm -T "quorum geth $n static" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --verbosity 2 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --ipcpath \"$QUORUM_NODE/geth.ipc\"; sleep 20" &
+   echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_addPeer\",\"params\":[$DYNAMICALLY_ADDED_ENODE],\"id\":$n}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.'
 done
 
-cp $RAFT/accounts/keystore/* $QUORUM_NODE/keystore/
-mist --rpc=$QUORUM_NODE/geth.ipc --gethpath=$RAFT/geth
+n=1
+QUORUM_NODE=$RAFT/cnode_data/cnode$n
+ADDITIONAL_FLAG='--raftjoinexisting 4'
+xterm -T "quorum geth $n dynamic" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth $ADDITIONAL_FLAG --verbosity 2 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --ipcpath \"$QUORUM_NODE/geth.ipc\"; sleep 20" &
 
-f941a5bf5806bd5d2fce6c271e63e5a9e8927fe4
+#check if all nodes have the same peer list
+for n in {1..4}
+do QUORUM_NODE=$RAFT/cnode_data/cnode$n
+   echo node$n $(sha1sum <(echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_cluster\",\"params\":[],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.result | sort_by(.raftId)') | awk '{print $1}')
+done
 
-yes "" | $RAFT/geth --datadir $RAFT/accounts account new
+#remove peer #3
+n=1
+QUORUM_NODE=$RAFT/cnode_data/cnode$n
+echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_removePeer\",\"params\":[3],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc"
 
-Private key: 0x1f01c0930df479da4aec796d149c8be2620a745853f2c49e677000e558d42080
-Public key:  9cb911d5d31cb966706d3764892ed2d4b7ed34cf6e7e4f365a260532e6aacc39d85ae652d62f6139a128a8da81c66531740228c9d8b29f94e5ed9efc31a764fd
-Address:     0x3223f261cf7d8bb13a63a348cd40d32427399693
+for n in {1..4}
+do QUORUM_NODE=$RAFT/cnode_data/cnode$n
+   echo node$n $(sha1sum <(echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_cluster\",\"params\":[],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.result | sort_by(.raftId)') | awk '{print $1}')
+done
 
-$RAFT/geth --datadir $RAFT/accounts account import <(echo 1f01c0930df479da4aec796d149c8be2620a745853f2c49e677000e558d42080)
-$RAFT/geth --ipcpath=$QUORUM_NODE/geth.ipc --datadir $QUORUM_NODE attach
-
-echo $QUORUM_NODE/geth.ipc
+n=1
+QUORUM_NODE=$RAFT/cnode_data/cnode$n
+echo Block number: $(($(echo "{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq -r '.result')))
