@@ -1,5 +1,6 @@
 BASEDIR=$PWD
 IBFT=$BASEDIR/ibft
+rm -rf $BASEDIR/*
 
 mkdir -p $BASEDIR/go/src/github.com/getamis
 cd $BASEDIR/go/src/github.com/getamis
@@ -45,21 +46,67 @@ done
 for n in {1..6}
 do mkdir -p $IBFT/qdata/node$n/geth
    cp $IBFT/static-nodes.json $IBFT/qdata/node$n/
-   $IBFT/geth --datadir $IBFT/qdata/node$n init $IBFT/genesis.json
    if [ "$n" -lt "5" ]; then
-       cp $IBFT/enode_id_$n $IBFT/qdata/node3/geth/nodekey
+       cp $IBFT/enode_id_$n $IBFT/qdata/node$n/geth/nodekey
    fi
+   $IBFT/geth --datadir $IBFT/qdata/node$n init $IBFT/genesis.json
 done
 
 mkdir -p $IBFT/qdata/node1/keystore
 cp $IBFT/accounts/keystore/key1 $IBFT/qdata/node1/keystore
 
+#$IBFT/geth --datadir $IBFT/qdata/node$n attach "$IBFT/qdata/node$n/geth.ipc" --exec "eth.getBlockNumber(console.log)"
 for n in {1..6}
 do
 if [ "$n" -lt "5" ]; then
-  ISTANBUL='--mine --etherbase 0x$ADDRESS --istanbul.requesttimeout 5000 --istanbul.blockperiod 10'
+  ISTANBUL="--mine --istanbul.requesttimeout 10000 --istanbul.blockperiod 20"
+  #ISTANBUL="--istanbul.requesttimeout 5000 --istanbul.blockperiod 10"
 else
+  #ETHERBASE=
   ISTANBUL=
 fi
-  xterm -T "quorum geth $n static" -fg white -bg black -e "cd $IBFT/qdata/node$n; $IBFT/geth --datadir $IBFT/qdata/node$n --port 2300$(($n-1)) --ipcpath \"$IBFT/qdata/node$n/geth.ipc\" $ISTANBUL console; sleep 20" &
+  xterm -T "quorum geth $n static" -fg white -bg black -e "cd $IBFT/qdata/node$n; $IBFT/geth --verbosity 4 --datadir $IBFT/qdata/node$n --port 2300$(($n-1)) --ipcpath \"$IBFT/qdata/node$n/geth.ipc\" $ISTANBUL console; sleep 20" &
+done
+
+#adding a new validator - the coinbase address
+echo $PRIVKEY > $IBFT/enode_id_5
+mkdir -p $IBFT/qdata/node7/geth
+cp $IBFT/static-nodes.json $IBFT/qdata/node7/
+cp $IBFT/enode_id_5 $IBFT/qdata/node7/geth/nodekey
+$IBFT/geth --datadir $IBFT/qdata/node7 init $IBFT/genesis.json
+
+xterm -T "quorum geth 7 added" -fg white -bg black -e "cd $IBFT/qdata/node7; $IBFT/geth --verbosity 4 --datadir $IBFT/qdata/node7 --port 23006 --ipcpath \"$IBFT/qdata/node7/geth.ipc\" --mine --istanbul.requesttimeout 10000 --istanbul.blockperiod 20 console; sleep 20" &
+
+
+#it's time for (2F+ 1) other validators to agree on the insertion of the new validator
+for n in {1..4}
+do  $IBFT/geth attach "$IBFT/qdata/node$n/geth.ipc" -exec "istanbul.propose(\"0x$ADDRESS\", true)"
+echo "istanbul.propose(\"0x$ADDRESS\", true)"
+done
+
+ELAPSED=0
+while [ "$($IBFT/geth attach "$IBFT/qdata/node1/geth.ipc" -exec "istanbul.getValidators()" | jq 'length')" -eq "4" ]
+do
+    sleep 1
+    ELAPSED=$(($ELAPSED+1))
+    echo \>\>seconds $ELAPSED :: validators $($IBFT/geth attach "$IBFT/qdata/node7/geth.ipc" -exec "istanbul.getValidators()" | jq 'length')
+done
+
+echo =====candidates
+for n in {1..7}
+do  $IBFT/geth attach "$IBFT/qdata/node$n/geth.ipc" -exec "istanbul.candidates"
+    echo "istanbul.candidates"
+done
+
+for n in {1..4}
+do  $IBFT/geth attach "$IBFT/qdata/node$n/geth.ipc" -exec "istanbul.propose(\"0x$ADDRESS\", false)"
+echo "istanbul.propose(\"0x$ADDRESS\", false)"
+done
+
+ELAPSED=0
+while [ "$($IBFT/geth attach "$IBFT/qdata/node1/geth.ipc" -exec "istanbul.getValidators()" | jq 'length')" -eq "5" ]
+do
+    sleep 1
+    ELAPSED=$(($ELAPSED+1))
+    echo \>\>seconds $ELAPSED :: validators echo \>\>seconds $ELAPSED :: validators $($IBFT/geth attach "$IBFT/qdata/node7/geth.ipc" -exec "istanbul.getValidators()" | jq 'length')
 done
