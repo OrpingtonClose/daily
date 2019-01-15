@@ -1,7 +1,7 @@
 #apt-cache show $(xsel -b) | grep ^Description-en | tee /dev/fd/2 | cut -d':' -f2 | xsel -b
 sudo apt-get install xterm jq git  -y
 sudo apt-get install libdb-dev -y      #Description-en: Berkeley Database Libraries [development]
-sudo apt-get install libleveldb-dev -y #fast key-value storage library (development files)
+sudo apt-get install libleveldb-dev -y #fast key-value storage library (development files)geth
 sudo apt-get install libsodium-dev -y  #Network communication, cryptography and signaturing library - headers
 sudo apt-get install zlib1g-dev -y     #Compression library - development
 sudo apt-get install libtinfo-dev -y   #developer's library for the low-level terminfo library
@@ -73,7 +73,7 @@ do xterm -fg white -bg black -e "$RAFT/constellation-node $RAFT/constellation$n.
 done
 
 for n in {1..4}
-do $RAFT/bootnode -genkey $BASEDIR/enode_id_$n #| tee /dev/fd/2 | sh
+do $RAFT/bootnode -genkey $BASEDIR/enode_id_$n
 done
 
 echo [ > $BASEDIR/static-nodes.json
@@ -128,35 +128,70 @@ do
 done
 
 #first node to be dynamically added to the network
-for n in {2..4}
-do 
-   n_to_add=1
-   DYNAMICALLY_ADDED_ENODE=$(echo \"enode://$($RAFT/bootnode -nodekey $BASEDIR/enode_id_$n_to_add -writeaddress)@127.0.0.1:2300$n_to_add?raftport=2100$n_to_add\")
+launch_geth_node() {
+   n_to_add=$1
+   n=$1
    QUORUM_NODE=$RAFT/cnode_data/cnode$n   
-   xterm -T "quorum geth $n static" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --verbosity 2 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --ipcpath \"$QUORUM_NODE/geth.ipc\"; sleep 20" &
-   echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_addPeer\",\"params\":[$DYNAMICALLY_ADDED_ENODE],\"id\":$n}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.'
-done
+   xterm -T "quorum geth $n static" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --networkid 3334 --verbosity 3 --datadir $QUORUM_NODE --mine --port 2300$n --raftport 2100$n --raft --rpc --rpcport 800$n --mine --rpcapi admin,db,debug,eth,miner,raft,net,personal,shh,txpool,web3 --ipcpath \"$QUORUM_NODE/geth.ipc\"; sleep 20" &
+}
 
-n=1
-QUORUM_NODE=$RAFT/cnode_data/cnode$n
-ADDITIONAL_FLAG='--raftjoinexisting 4'
-xterm -T "quorum geth $n dynamic" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth $ADDITIONAL_FLAG --verbosity 2 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --ipcpath \"$QUORUM_NODE/geth.ipc\"; sleep 20" &
+add_dynamic_node() {
+  n=$1
+  n_to_add=$2
+  DYNAMICALLY_ADDED_ENODE=$(echo \"enode://$($RAFT/bootnode -nodekey $BASEDIR/enode_id_$n_to_add -writeaddress)@127.0.0.1:2300$n_to_add?raftport=2100$n_to_add\")
+  QUORUM_NODE=$RAFT/cnode_data/cnode$n
+  echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_addPeer\",\"params\":[$DYNAMICALLY_ADDED_ENODE],\"id\":$n}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.'
+}
+
+#add_dynamic_node 3
+
+launch_dynamic_geth_node() {
+  n=$1
+  QUORUM_NODE=$RAFT/cnode_data/cnode$n
+  ADDITIONAL_FLAG="--raftjoinexisting $2"
+  xterm -T "quorum geth $n dynamic" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth $ADDITIONAL_FLAG  --networkid 3334 --verbosity 3 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --rpc --rpcport 800$n --mine --rpcapi admin,db,debug,eth,miner,raft,net,personal,shh,txpool,web3 --ipcpath \"$QUORUM_NODE/geth.ipc\"; sleep 20" &
+}
+
+check_peers() {
+  n=$1
+  QUORUM_NODE=$RAFT/cnode_data/cnode$n
+  echo node$n 
+  echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_cluster\",\"params\":[],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.result | sort_by(.raftId)' 
+}
+
+check_peers_hash() {
+   QUORUM_NODE=$RAFT/cnode_data/cnode$n
+   echo node$n $(sha1sum <(echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_cluster\",\"params\":[],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.result | sort_by(.raftId)') | awk '{print $1}')
+}
+
+launch_geth_node 2
+launch_geth_node 3
+launch_geth_node 4
+launch_dynamic_geth_node 1 4
+
+check_peers 1
+check_peers 2
+check_peers 3
+check_peers 4
+
+add_dynamic_node 2 1
+# add_dynamic_node 3 1
+# add_dynamic_node 4 1
 
 #check if all nodes have the same peer list
+#dynamic node doesn't have per list, just [null]
 for n in {1..4}
 do QUORUM_NODE=$RAFT/cnode_data/cnode$n
    echo node$n $(sha1sum <(echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_cluster\",\"params\":[],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.result | sort_by(.raftId)') | awk '{print $1}')
 done
 
 #remove peer #3
-n=1
+n=2
 QUORUM_NODE=$RAFT/cnode_data/cnode$n
 echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_removePeer\",\"params\":[3],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc"
 
-for n in {1..4}
-do QUORUM_NODE=$RAFT/cnode_data/cnode$n
-   echo node$n $(sha1sum <(echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_cluster\",\"params\":[],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.result | sort_by(.raftId)') | awk '{print $1}')
-done
+$RAFT/geth attach "$QUORUM_NODE/geth.ipc"
+
 
 n=1
 QUORUM_NODE=$RAFT/cnode_data/cnode$n
