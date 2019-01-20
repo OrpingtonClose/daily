@@ -7,6 +7,10 @@ var abi = [{"constant":false,"inputs":[{"name":"fileHash","type":"string"}],"nam
 var message = "hello";
 var messageHash = sha256(message);
 var owner = "Enterprise 1";
+var privateFor = ["/Z1+Fe3tRAf+lyyXKZCil8pkSebWW+O0XELGRNquIlE="
+                 ,"3f/cPMz+tu1bPUXRgGjNVFbWQly45ix9s6STZYQ8Dh4="
+                 ,"rZpUaM5y4yk3qbAchczsFpSX+RmJHpLho8eAxf2h6Do="
+                 ,"WC0NbFD3f3bSOymsNTWYuCvIi3gWeOCU6DKqDpqBexU="];
 
 var rpcAddresses = [["http://localhost:8001", "http://localhost:8002", "http://localhost:8003", "http://localhost:8004"][0]];
 
@@ -31,8 +35,9 @@ rpcAddresses.forEach(deployAddress=>{
         }
         var tx = contract.transactionHash;
         var contractAddress = web3.eth.getTransactionReceipt(tx).contractAddress;
+        console.log(contractAddress);
         var contractDeployed = proofContract.at(contractAddress);
-        contractDeployed.set.sendTransaction(owner, messageHash, {from: address}, function(e, transactionHash) {
+        contractDeployed.set.sendTransaction(owner, messageHash, {from: address, privateFor}, function(e, transactionHash) {
             if (e) {
                 console.log("==============================================================ERR");
                 console.log(e);
@@ -50,7 +55,7 @@ rpcAddresses.forEach(deployAddress=>{
                     web3.personal.unlockAccount(address)
                     //console.log(provider.host);
                     results.push([contractOnAnotherNode.get.call(messageHash), provider.host]);        
-                })
+                });
         
                 results.forEach(result => {
                     if (owner === result[0][1]) {

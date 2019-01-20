@@ -21,7 +21,7 @@ var from = web3.eth.accounts.reduce((biggest_account, new_account) => {
     }
 });
 
-var to = _.without(web3.eth.accounts, sending_account)[0];
+var to = _.without(web3.eth.accounts, from)[0];
 var unlockPasswordless = _.partial(web3.personal.unlockAccount, _, '');
 [from, to].forEach(unlockPasswordless);
 

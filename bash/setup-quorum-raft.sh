@@ -132,7 +132,7 @@ launch_geth_node() {
    n_to_add=$1
    n=$1
    QUORUM_NODE=$RAFT/cnode_data/cnode$n   
-   xterm -T "quorum geth $n static" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --networkid 3334 --verbosity 3 --datadir $QUORUM_NODE --mine --port 2300$n --raftport 2100$n --raft --rpc --rpcport 800$n --mine --rpcapi admin,db,debug,eth,miner,raft,net,personal,shh,txpool,web3 --ipcpath \"$QUORUM_NODE/geth.ipc\"; sleep 20" &
+   xterm -T "quorum geth $n static" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth --networkid 3334 --verbosity 3 --datadir $QUORUM_NODE --mine --port 2300$n --raftport 2100$n --raft --rpc --rpcport 800$n --mine --rpcapi admin,db,debug,eth,miner,raft,net,personal,shh,txpool,web3 --ipcpath \"$QUORUM_NODE/geth.ipc\" console; sleep 20" &
 }
 
 add_dynamic_node() {
@@ -149,7 +149,7 @@ launch_dynamic_geth_node() {
   n=$1
   QUORUM_NODE=$RAFT/cnode_data/cnode$n
   ADDITIONAL_FLAG="--raftjoinexisting $2"
-  xterm -T "quorum geth $n dynamic" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth $ADDITIONAL_FLAG  --networkid 3334 --verbosity 3 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --rpc --rpcport 800$n --mine --rpcapi admin,db,debug,eth,miner,raft,net,personal,shh,txpool,web3 --ipcpath \"$QUORUM_NODE/geth.ipc\"; sleep 20" &
+  xterm -T "quorum geth $n dynamic" -fg white -bg black -e "cd $RAFT; PRIVATE_CONFIG=$RAFT/constellation$n.conf $RAFT/geth $ADDITIONAL_FLAG  --networkid 3334 --verbosity 3 --datadir $QUORUM_NODE --port 2300$n --raftport 2100$n --raft --rpc --rpcport 800$n --mine --rpcapi admin,db,debug,eth,miner,raft,net,personal,shh,txpool,web3 --ipcpath \"$QUORUM_NODE/geth.ipc\" console; sleep 20" &
 }
 
 check_peers() {
