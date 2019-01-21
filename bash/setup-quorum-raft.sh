@@ -68,9 +68,14 @@ verbosity = 3
 EOF
 done
 
-for n in {1..4}
-do xterm -fg white -bg black -e "$RAFT/constellation-node $RAFT/constellation$n.conf" &
-done
+launch-constellation() {
+  xterm -fg white -bg black -e "$RAFT/constellation-node $RAFT/constellation$1.conf" &
+}
+launch-constellation 1
+launch-constellation 2
+launch-constellation 3
+launch-constellation 4
+
 
 for n in {1..4}
 do $RAFT/bootnode -genkey $BASEDIR/enode_id_$n

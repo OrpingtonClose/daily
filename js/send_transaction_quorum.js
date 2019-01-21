@@ -5,7 +5,7 @@ var abi = [{"constant":true,"inputs":[],"name":"storedData","outputs":[{"name":"
 var data = "0x6060604052341561000f57600080fd5b604051602080610149833981016040528080519060200190919050505b806000819055505b505b610104806100456000396000f30060606040526000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680632a1afcd914605157806360fe47b11460775780636d4ce63c146097575b600080fd5b3415605b57600080fd5b606160bd565b6040518082815260200191505060405180910390f35b3415608157600080fd5b6095600480803590602001909190505060c3565b005b341560a157600080fd5b60a760ce565b6040518082815260200191505060405180910390f35b60005481565b806000819055505b50565b6000805490505b905600a165627a7a72305820d5851baab720bba574474de3d09dbeaabc674a15f4dd93b974908476542c23f00029";
 var gas = 0x47b760;
 
-var simpleContract = web3.eth.contract(abi);
+//var simpleContract = web3.eth.contract(abi);
 
 var privateKeys = {"http://localhost:8001": "/Z1+Fe3tRAf+lyyXKZCil8pkSebWW+O0XELGRNquIlE=",
                    "http://localhost:8002": "3f/cPMz+tu1bPUXRgGjNVFbWQly45ix9s6STZYQ8Dh4=",
@@ -25,29 +25,100 @@ var nodes = _.entries(privateKeys).map( entries =>{
         web3
     };
 });
+                
+
+var l = nodes.length;
+var a = _.range(l);
+var r = a.map(n=>[n]);
+
+r = r.concat(_.flatten(a.map( m => {
+    return a.map( n => {
+        return _.orderBy([n, m]);
+    });
+})).filter(m => {
+    return _.every(m.map(n=>{
+        return _.without(m, n).length;
+    }), n => n === m.length-1);
+}));
+r = r.concat(_.flatten(_.flatten(a.map( m => {
+    return a.map( n => {
+        return a.map( z => {
+            return _.orderBy([n, m, z]);
+        });
+    });
+}))).filter(m => {
+    return _.every(m.map(n=>{
+        return _.without(m, n).length;
+    }), n => n === m.length-1);
+}))
+r.push(a);
+r.unshift([]);
+var nodeCombinations = r.map(r => _.at(nodes, r)); 
+
+var wait = (contract, callback) => {
+    if(!contract.address) {
+        setTimeout(function () {
+            wait(contract, callback);
+        }, 1000);
+    } else{
+        callback();
+    }
+}
 
 var value = 1000;
+function DeployPublicAndCall() {
+    nodes.forEach(nodeDeploying => {    
+        nodeDeploying.web3.personal.unlockAccount(nodeDeploying.web3.eth.accounts[0]);
+        value += 1;
+        var localValue = value;
+        var contractDeployed = nodeDeploying.web3.eth.contract(abi).new(localValue, {
+            from: nodeDeploying.web3.eth.accounts[0], 
+            data, 
+            gas
+        });
+
+        wait(contractDeployed, ()=>{
+            nodes.forEach(node=>{
+                var result = node.web3.eth.contract(abi).at(contractDeployed.address).get.call();
+                console.log(`public contract public call ${localValue === result.toNumber() ? "success" : "can't find"} -> ${nodeDeploying.host} -> ${node.host}`);
+            });        
+        });
+    });
+}
+
+function DeployPrivateAndCall(nodesAddressed) {
+    nodes.forEach(nodeDeploying => {    
+        nodeDeploying.web3.personal.unlockAccount(nodeDeploying.web3.eth.accounts[0]);
+        value += 1;
+        var localValue = value;
+        var contractDeployed = nodeDeploying.web3.eth.contract(abi).new(localValue, {
+            from: nodeDeploying.web3.eth.accounts[0], 
+            data, gas, privateFor: _.without(nodesAddressed.map(node=>node.pubkey), nodeDeploying.pubkey)
+        });
+        //console.log(`private contract with all nodes participating public call`);
+        var nodesAddressedMessage = nodesAddressed.map(node=>node.port).join(",") || "none"; 
+        wait(contractDeployed, ()=>{
+            nodes.forEach(node=>{
+                var result = node.web3.eth.contract(abi).at(contractDeployed.address).get.call().toNumber();
+                var resultString = localValue === result ? "success" : "-------";
+                console.log(`${nodesAddressedMessage} ${resultString} ${nodeDeploying.host} -> ${node.host}`);
+            });        
+        });
+    });
+}
+
+DeployPublicAndCall();
+var allNodes = _.flatten(_.filter(nodeCombinations, comb=>comb.length === nodes.length));
+DeployPrivateAndCall(allNodes)
+DeployPrivateAndCall([])
+
 var c;
-nodes.forEach(node => {
-    
-    node.web3.personal.unlockAccount(node.web3.eth.accounts[0]);
-    
-    var contractDeployed = node.web3.eth.contract(abi).new(value, {
-        from: node.web3.eth.accounts[0], 
-        data, 
-        gas
-    });
-    console.log(contractDeployed.address);
-    c = node.web3.eth.contract(abi).at(contractDeployed.address);
-    nodes.forEach(node=>{
-        var result = node.web3.eth.contract(abi).at(contractDeployed.address).get.call();
-        console.log(`${value} ${result.toNumber()} -> ${node.host}`);
-    });
-    value += 1;
+nodeCombinations.forEach(function(comb) {
+    c = comb;
+    console.log(comb);
+//    DeployPrivateAndCall(comb);
 });
-c.get.call()
-
-
+DeployPrivateAndCall(c);
 
 
 var deployAccount = nodes[0].web3.eth.accounts[0];
@@ -112,31 +183,6 @@ indices.push(
 
 
 
-var l = 4;
-var a = _.range(l);
-var r = a.map(n=>[n]);
-
-r = r.concat(_.flatten(a.map( m => {
-    return a.map( n => {
-        return _.orderBy([n, m]);
-    });
-})).filter(m => {
-    return _.every(m.map(n=>{
-        return _.without(m, n).length;
-    }), n => n === m.length-1);
-}));
-r = r.concat(_.flatten(_.flatten(a.map( m => {
-    return a.map( n => {
-        return a.map( z => {
-            return _.orderBy([n, m, z]);
-        });
-    });
-}))).filter(m => {
-    return _.every(m.map(n=>{
-        return _.without(m, n).length;
-    }), n => n === m.length-1);
-}))
-r = r.concat([a]);
 
 //var pubkeyCombinations = r.map(c=>_.at(nodes.map(n=>n.pubkey), c))
 
@@ -386,6 +432,56 @@ var f = (callback, result) => {
         callback("yes");
     }
 }
+
+
+var apiMethod = () => {
+    console.log(a);
+    ++a;
+}
+async.until(() => a > 3, apiMethod)
+
+var a = 0;
+var f = () => {
+    if(a<5) {
+        setTimeout(function () {
+            a += 1;
+            console.log(a);
+            f();
+        }, 1000);
+    }
+}
+f();
+
+var count = 0;
+
+async.whilst(
+    function () { return count < 5; },
+    function (callback) {
+        console.log(count)
+        count++;
+        setTimeout(function () {
+            callback(null, count);
+        }, 1000);
+    },
+    function (err, n) {
+        console.log(err, n)
+        // 5 seconds have passed, n = 5
+    }
+);
+
+console.log("herp")
+
+async.retry({times: 5, interval: 2000}, function(callback, result) {
+    apiMethod();
+    console.log(`result ${[...arguments]}`);
+    if ( a > 3 ) {
+        callback("no", a);
+    } else {
+        callback("yes");
+    }
+    return a;
+});
+
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 var Web3 = require("web3");
