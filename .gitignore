@@ -1,1 +1,4 @@
 rust/aaa/target/.rustc_info.json
+settings.json
+\.*
+.vscode
