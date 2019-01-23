@@ -2,3 +2,4 @@ rust/aaa/target/.rustc_info.json
 settings.json
 \.*
 .vscode
+js/data.db

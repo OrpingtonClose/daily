@@ -5,8 +5,6 @@ var abi = [{"constant":true,"inputs":[],"name":"storedData","outputs":[{"name":"
 var data = "0x6060604052341561000f57600080fd5b604051602080610149833981016040528080519060200190919050505b806000819055505b505b610104806100456000396000f30060606040526000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680632a1afcd914605157806360fe47b11460775780636d4ce63c146097575b600080fd5b3415605b57600080fd5b606160bd565b6040518082815260200191505060405180910390f35b3415608157600080fd5b6095600480803590602001909190505060c3565b005b341560a157600080fd5b60a760ce565b6040518082815260200191505060405180910390f35b60005481565b806000819055505b50565b6000805490505b905600a165627a7a72305820d5851baab720bba574474de3d09dbeaabc674a15f4dd93b974908476542c23f00029";
 var gas = 0x47b760;
 
-//var simpleContract = web3.eth.contract(abi);
-
 var privateKeys = {"http://localhost:8001": "/Z1+Fe3tRAf+lyyXKZCil8pkSebWW+O0XELGRNquIlE=",
                    "http://localhost:8002": "3f/cPMz+tu1bPUXRgGjNVFbWQly45ix9s6STZYQ8Dh4=",
                    "http://localhost:8003": "rZpUaM5y4yk3qbAchczsFpSX+RmJHpLho8eAxf2h6Do=",
@@ -88,17 +86,11 @@ var deployContract = _.partial(function(bytecode, abi, gas, initialValue, nodeDe
         opts.data = bytecode;
         opts.gas = gas;
         if (nodesPrivateFor !== undefined) {
-            //shows?
-            // console.log("================================nodesPrivateFor.map(node=>node.pubkey)");
-            // console.log(nodesPrivateFor.map(node=>node.pubkey));
             opts.privateFor = _.without(nodesPrivateFor.map(node=>node.pubkey), nodeDeploying.pubkey);
         }
         var contractDeployed = nodeDeploying.web3.eth.contract(abi).new(initialValue, opts)
         var result = {initialValue, contractDeployed, nodeDeploying, deployedPrivateFor: nodesPrivateFor};
         waitForDeployment(contractDeployed, function() {
-            //alright
-            // console.log("=======================================result");
-            // console.log(result);
             resolve(result);
         });
     });
@@ -128,19 +120,13 @@ var saveResult = function(args) {
     var {valueSameAsDeployed, valueSameAsSetting, success,
         nodeDeploying, deployedPrivateFor, 
         nodeSetting, settingPrivateFor, nodeGetting} = args;
-    // console.log("========saveResults args");
-    // console.log(args);
-    // console.log("========saveResults deployedPrivateFor");
-    // console.log(deployedPrivateFor);
     return new Promise(function(resolve, reject) {
         var result = _.omitBy({ valueSameAsDeployed, valueSameAsSetting, success }, _.negate(_.identity));
         result[`deployed:${nodeDeploying.port}`] = true;
-        // console.log("=================================deployedPrivateFor");
-        // console.log(deployedPrivateFor)
         if (deployedPrivateFor) {
             deployedPrivateFor.forEach( node => {
                 result[`deployed_private_for:${node.port}`] = true;    
-            }); 
+            });
         }
         if (nodeSetting) {
             result[`setting:${nodeSetting.port}`] = true;
@@ -153,64 +139,149 @@ var saveResult = function(args) {
     });
 }
 
+// var saveToLeveldb = function(path) {
+//     const levelup = require('levelup');
+//     const sqldown = require('sqldown');
+//     const SQLite = require('sqlite3');
+//     const uuid = require('uuid/v1');
+//     const sqlite = new SQLite.Database(path);
+//     return function(args) {
+//         var {valueSameAsDeployed, valueSameAsSetting, success,
+//             nodeDeploying, deployedPrivateFor, 
+//             nodeSetting, settingPrivateFor, nodeGetting} = args;
+//         return new Promise(function(resolve, reject) {
+                        
+//             var db = levelup(sqldown(path));
+//             var key = uuid();
+//             var put = (field, value) =>{
+//                 return Promise.all([
+//                     db.put(`$field:${field}`, true),
+//                     db.put(`${key}:${field}`, value)
+//                 ]);
+//             };
+            
+//             var promises = [];           
+//             if (valueSameAsDeployed) {
+//                 promises.push(put("valueSameAsDeployed", valueSameAsDeployed));
+//             }
+//             if (valueSameAsSetting) {
+//                 promises.push(put("valueSameAsSetting", valueSameAsSetting));
+//             }
+//             if (success) {
+//                 promises.push(put("success", success));
+//             }
+//             promises.push(put(`deployed:${nodeDeploying.port}`, true));
+//             if (deployedPrivateFor) {
+//                 deployedPrivateFor.forEach( node => {
+//                     promises.push(pub(`deployed_private_for:${node.port}`,true));
+//                 });
+//             }
+
+//             if (nodeSetting) {
+//                 promises.push(put(`setting:${nodeSetting.port}`, true));
+//                 settingPrivateFor.forEach( node => {
+//                     promises.push(put(`deployed_private_for:${node.port}`, true));    
+//                 }); 
+//             }
+
+//             promises.push(put(`getter:${nodeGetting.port}`, true));
+//             Promise.all(promises).then(n=>{
+//                 resolve()
+//             });
+//         });
+//     }
+// }
+
 var run = function(nodesDeploying, deployingPrivateForNodes, nodesSetting, settingPrivateForNodes, nodesGetting) {
     return new Promise((resolve, reject)=>{  
         
         var deploying = nodesDeploying.map(node => _.partial(deployContract, node));
         var deployed = _.flatMap(deployingPrivateForNodes, nodes => {
-            // console.table("=====================================nodes");
-            // console.log(nodes)
             return deploying.map(fun => fun(nodes))
         });
-        //console.log(deployed);
-        //alright
-        //console.table("=====================================deployingPrivateForNodes");
-        //console.log(deployingPrivateForNodes)
         var checking = function(nodeGetting) {
             return function({initialValue, contractDeployed, nodeDeploying, deployedPrivateFor, nodeSet, setPrivateFor }) {
                 var check = _.partial(getAndCheck, contractDeployed, initialValue, 
                                       nodeDeploying, deployedPrivateFor, nodeSet, 
                                       setPrivateFor, nodeSet ? initialValue + 1 : null );
-                // console.table("=====================================nodesPrivateFor>>");
-                // console.table(nodesPrivateFor);
                 return check(nodeGetting);
             }
         }
 
-        // console.table("=====================================nodesPrivateFor");
-        // console.table(nodesPrivateFor);
-        var callbacksforGettingNodes = nodesGetting.map(data=>{
-            // console.log("===================================nodesGetting.map(data=>{");
-            // console.log(Object.keys(data))
-            return checking(data);
-        });
-        // console.log("=====================================deployed");
-        // console.log(deployed);
+        var callbacksforGettingNodes = nodesGetting.map(checking);
+
         var processed = _.flatMap(deployed, deployedContract => callbacksforGettingNodes.map(callback => {
-            //alright
-            // console.log("=====================================deployedContract");
-            // console.log(deployedContract);
-            return deployedContract.then(data=>{
-                // console.log("=====================================return deployedContract.then(data=>{");
-                // console.log(Object.keys(data))
-                return callback(data);
-            });
+            return deployedContract.then(callback);
         }));
-        // console.log("===========================================processed");
-        // console.log(processed);
+        //var store = saveToLeveldb('./data.db');
+
+        // var done = processed.map(p=>{
+        //     return p.then(data=>{
+        //         return store(data);
+        //     });
+        // });
         var done = processed.map(p=>p.then(data=>{
-            // console.log("===========================================data");
-            // console.log(data);
             return saveResult(data);
         }));
-        Promise.all(done).then(resolve);
+        return Promise.all(done).then(d=>resolve(d));
     });
 }
+
+var saveToLeveldb = function(path) {
+    const levelup = require('levelup');
+    const sqldown = require('sqldown');
+    const SQLite = require('sqlite3');
+    const uuid = require('uuid/v1');
+
+    const sqlite = new SQLite.Database(path, SQLite.OPEN_READWRITE | SQLite.OPEN_CREATE);
+    var db = levelup(sqldown(path));
+    //db.createKeyStream().on('data', db.del);
+    return function(args) {
+        return new Promise(function(resolve, reject) {                                   
+            var key = uuid();
+            var put = function([field, value]) {
+                return Promise.all([
+                    db.put(`$field:${field}`, true),
+                    db.put(`${key}:${field}`, value)
+                ]);
+            };
+            Promise.all(_.entries(args).map(put)).then(d=>{
+                console.log("done!!")
+                resolve()
+            });
+        });
+    }
+}
+const fs = require('fs');
+dbPath = './data.db';
+console.log(`db created here: ${fs.realpathSync(dbPath)}`)
+try {
+    fs.unlinkSync(dbPath);
+} catch {
+    //pass
+}
+var store = saveToLeveldb(dbPath);
+
+//var result;
+nodeCombinations.slice(0, 10).forEach(nodeComb => {
+    run(nodes, [nodeComb], [undefined], [undefined], nodes).then(data=>{
+        console.table(data);
+        Promise.all(data.map(store));
+        //Promise.resolve(Promise.all(data.map(store)))
+    }).then(d=>{
+        console.log("success")
+    });
+})
+//cant handle large volume. geth node shuts down after a while
 var result;
-run(nodes, nodeCombinations, [undefined], [undefined], nodes).then(data=>{
-    console.log("done")
+run(nodes, nodeCombinations.slice(0, 4), [undefined], [undefined], [nodes[0]]).then(data=>{
     result = data;
+    console.log("done!!!")
 });
+// .map(p=>{}).then(data=>{
+//     console.log("done")
+//     result = data;
+// });
 
 // result.length
 // console.table(result)
