@@ -15,6 +15,7 @@ wget https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz
 sudo tar -xvf go1.10.3.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go
 sudo mv go /usr/local/
+rm go1.10.3.linux-amd64.tar.gz
 
 echo export GOROOT=/usr/local/go | sudo tee -a /etc/profile | sh
 echo export PATH=$GOROOT/bin:$PATH | sudo tee -a /etc/profile | sh
@@ -23,6 +24,7 @@ cd $BASEDIR
 git clone https://github.com/jpmorganchase/quorum.git
 cd $BASEDIR/quorum
 make all
+rm -rf $BASEDIR/quorum
 
 #install constellation
 cd $BASEDIR
@@ -33,6 +35,7 @@ cd $BASEDIR
 git clone https://github.com/jpmorganchase/constellation.git
 cd $BASEDIR/constellation
 stack install
+rm -rf $BASEDIR/constellation
 
 cp ~/.local/bin/constellation-node $RAFT/
 cp $BASEDIR/quorum/build/bin/geth $RAFT/
@@ -82,6 +85,15 @@ do  echo ===================================
 done
 CONTENT=$(head -n -1 $BASEDIR/static-nodes.json)]
 
+launch-constellation() {
+  xterm -fg white -bg black -e "$RAFT/constellation-node $RAFT/constellation$1.conf" &
+}
+
+launch-constellation 1
+launch-constellation 2
+launch-constellation 3
+launch-constellation 4
+
 for n in {2..4}
 do echo ${CONTENT} > $RAFT/cnode_data/cnode$n/static-nodes.json
 done
@@ -121,11 +133,10 @@ do
    echo cp $RAFT/accounts/keystore/key1 $QUORUM_NODE/keystore/  | tee /dev/fd/2 | sh
    echo cp $BASEDIR/enode_id_$n $QUORUM_NODE/geth/nodekey | tee /dev/fd/2 | sh
    echo $RAFT/geth --datadir $QUORUM_NODE init $RAFT/genesis.json | tee /dev/fd/2 | sh
+   
+   openssl ecparam -name secp256k1 -genkey -noout | openssl ec -text -noout 2> /dev/null | grep priv -A 3 | tail -n -3 | tr -d '\n[:space:]:' | sed 's/^00//' > $QUORUM_NODE/node.key
+   yes "" | $RAFT/geth --datadir $QUORUM_NODE account import $QUORUM_NODE/node.key
 done
-
-launch-constellation() {
-  xterm -fg white -bg black -e "$RAFT/constellation-node $RAFT/constellation$1.conf" &
-}
 
 #first node to be dynamically added to the network
 launch_geth_node() {
@@ -144,7 +155,6 @@ add_dynamic_node() {
 }
 
 #add_dynamic_node 3
-
 launch_dynamic_geth_node() {
   n=$1
   QUORUM_NODE=$RAFT/cnode_data/cnode$n
@@ -163,22 +173,24 @@ check_peers_hash() {
    QUORUM_NODE=$RAFT/cnode_data/cnode$n
    echo node$n $(sha1sum <(echo "{\"jsonrpc\":\"2.0\",\"method\":\"raft_cluster\",\"params\":[],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq '.result | sort_by(.raftId)') | awk '{print $1}')
 }
-launch-constellation 1
-launch-constellation 2
-launch-constellation 3
-launch-constellation 4
-sleep 5
+
+# launch-constellation 1
+# launch-constellation 2
+# launch-constellation 3
+# launch-constellation 4
+# sleep 5
 launch_geth_node 2
 launch_geth_node 3
 launch_geth_node 4
 launch_dynamic_geth_node 1 4
+add_dynamic_node 2 1
+
 
 check_peers 1
 check_peers 2
 check_peers 3
 check_peers 4
 
-add_dynamic_node 2 1
 # add_dynamic_node 3 1
 # add_dynamic_node 4 1
 
@@ -200,3 +212,4 @@ $RAFT/geth attach "$QUORUM_NODE/geth.ipc"
 n=1
 QUORUM_NODE=$RAFT/cnode_data/cnode$n
 echo Block number: $(($(echo "{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}" | nc -w 1 -U "$QUORUM_NODE/geth.ipc" | jq -r '.result')))
+

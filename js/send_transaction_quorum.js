@@ -87,13 +87,16 @@ function simpleSet(nodeDeploying, privateForDeploying, nodeSetting, privateForSe
 
         nodeDeploying.web3.personal.unlockAccount(nodeDeploying.web3.eth.accounts[0]);
         var numberToDeploy = 123455;
-
-        var simple = simpleContract.new(numberToDeploy, {
+        
+        var opts = {
             from: nodeDeploying.web3.eth.accounts[0], 
             gas: 0x47b760, 
-            privateFor: _.without(privateForDeploying.map(node=>node.pubkey), nodeDeploying.pubkey),
             data
-        });
+        };
+        if (privateForDeploying) {
+            opts.privateFor = _.without(privateForDeploying.map(node=>node.pubkey), nodeDeploying.pubkey);
+        }
+        var simple = simpleContract.new(numberToDeploy, opts);
 
         waitForDeployment(simple, () => {
             console.log("done");
@@ -101,11 +104,16 @@ function simpleSet(nodeDeploying, privateForDeploying, nodeSetting, privateForSe
             var numberToSet = 33333333;
 
             nodeSetting.web3.personal.unlockAccount(nodeSetting.web3.eth.accounts[0]);
-            var tx = simpleContract.set.sendTransaction(numberToSet, {
+            var opts = {
                 from: nodeSetting.web3.eth.accounts[0], 
-                gas: 0x47b760, 
-                privateFor: _.without(privateForSetting.map(node=>node.pubkey), nodeSetting.pubkey)
-            });
+                gas: 0x47b760
+            };
+            
+            if (privateForDeploying) {
+                opts.privateFor = _.without(privateForDeploying.map(node=>node.pubkey), nodeSetting.pubkey);
+            }
+
+            var tx = simpleContract.set.sendTransaction(numberToSet, opts);
             waitForTx(nodeSetting.web3, tx, () => {
                 var simpleContract = nodeGetting.web3.eth.contract(abi).at(simple.address);
                 resolve({
@@ -122,12 +130,24 @@ function simpleSet(nodeDeploying, privateForDeploying, nodeSetting, privateForSe
     });
 }
 
-
-
-
 // simpleSet(nodes[0], nodes, nodes[1], nodes, nodes[2]).then(data=>{
 //     console.log(data);
 // })
+
+// simpleSet(nodes[0], null, nodes[1], nodes, nodes[2]).then(data=>{
+//     console.log(data);
+// })
+
+// simpleSet(nodes[0], nodes, nodes[1], null, nodes[2]).then(data=>{
+//     console.log(data);
+// })
+
+
+simpleSet(nodes[0], _.pullAt(Array.from(nodes), 1), nodes[1], null, nodes[2]).then(data=>{
+    console.log(data);
+}).catch(err=>{
+    console.log(err);
+})
 
 // //timeout
 // nodes.forEach(node=>{
@@ -182,7 +202,7 @@ function simpleDocumentHash(nodeDeploying, privateForDeploying, nodeSetting, pri
         });
     });
 }
-simpleDocumentHash(nodes[0], nodes, nodes[1], nodes, nodes[2])
+//simpleDocumentHash(nodes[0], nodes, nodes[1], nodes, nodes[2])
 //simplestDocumentHash();
 // var nodeDeploying = nodes[0];
 // var nodeSetting = nodes[1];
