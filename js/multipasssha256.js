@@ -25,3 +25,10 @@ multiHash(3)
 //done
 //#????
 //#dd6cdc26f92b18b899c30ab41e3da2664ace1d716d37a2dff0853747fec07045
+
+var bcrypt = require("bcrypt");
+var myPlaintextPassword = "herp mero";
+var salt = bcrypt.genSaltSync(10000);
+var hash = bcrypt.hashSync(myPlaintextPassword, salt);
+
+bcrypt.compareSync(myPlaintextPassword, hash)
