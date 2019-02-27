@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Hello World!</title>
+    </head>
+    <body>
+        <h1>Electorn Hello World!</h1>
+        <button id="error">Error dialog</button><div/>
+        <button id="messagebox">Regular dialog</button><div/>
+        <button id="filepick">files dialog</button><div/>
+        <button id="save">save dialog</button><div/>
+        <span></span>
+        <script>
+            document.getElementById("filepick").addEventListener("click", () => {
+                var cw = require("electron").remote.getCurrentWindow();
+                require("electron").remote.dialogs.showSaveDialog(cw, {
+                    title: "save dialog title",
+                    buttonLabel: "a button label",
+                    filters: [
+                        {name: "a filter item", extensions: ["png", "jpg", "txt"]}
+                    ]
+                });
+            }, filePath => {
+                document.getElementsByTagName("span")[0].innerText = filePath;
+            });
+            document.getElementById("filepick").addEventListener("click", () => {
+                var cw = require("electron").remote.getCurrentWindow();
+                require("electron").remote.dialog.showOpenDialog(cw, {
+                    title: "Open a file",
+                    buttonLabel: "this is a button label",
+                    filters: [
+                        {name: "Pictures", extensions: ["png", "jpg", "gif"]},
+                        {name: "Nothing special", extensions: ["herp"]},
+                        {name: "All", extensions: ["*"]},
+                    ],
+                    properties: ["openFile", "multiSelections"], //, "openDirectory", ]
+                }, selectedFiles => {
+                    document.getElementsByTagName("span")[0].innerText = selectedFiles.join("\n");
+                });
+            });
+            document.getElementById("error").addEventListener("click", () => {
+                require("electron").remote.dialog.showErrorBox("Not ok", "Something happened");
+            });
+            document.getElementById("messagebox").addEventListener("click", () => {
+                var curWin = require("electron").remote.getCurrentWindow();
+                var opts = {
+                    type: "warning",
+                    title: "Should we go forward?",
+                    message: "This action is not reversible",
+                    detail: "this is the detail of the message",
+                    //icon:
+                    buttons: ["OK", "Cancel"],
+                    defaultId: 1,
+                    cancelId: 1,
+                    checkboxLabel: "this is a checkbox label",
+                    checkboxChecked: false 
+                };
+                var msgbox = require("electron").remote.dialog.showMessageBox;
+                msgbox(curWin, opts, (response, checkboxChecked) => {
+                    document.getElementsByTagName("h1")[0].innerText += "this ";
+                    document.getElementsByTagName("span")[0].innerText = `response: ${response}\ncheckboxChecked: ${checkboxChecked}`;
+                    //console.log("will antything happen?");
+                    if (response === 0) {
+                        console.log("User clicked OK");
+                    }
+                    if (checkboxChecked) {
+                        console.log("Checkbox status: checked");
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

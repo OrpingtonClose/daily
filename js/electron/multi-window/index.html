@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Hello World!</title>
+    </head>
+    <body>
+        <h1>Electorn Hello World!</h1>
+        <button id="settings">Open Settings</button><div/>
+        <button id="unsafe">Open unsafe page</button>
+        <script>
+            document.getElementById("settings").addEventListener("click", () => {
+                require("electron").ipcRenderer.send("open-settings", "hello");
+            });
+            document.getElementById("unsafe").addEventListener("click", () => {
+                require("electron").ipcRenderer.send("open-unsafe", "hello");
+            });
+        </script>
+    </body>
+</html>
