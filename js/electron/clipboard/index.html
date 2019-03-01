@@ -1,0 +1,13 @@
+<div></div>
+<script>
+var electron = require("electron");
+electron.ipcRenderer.on("clipboard-content", (event, arg) => {
+    document.getElementsByTagName("body")[0].innerHTML = "<div/>";
+    document.getElementsByTagName("div")[0].innerText = arg;
+});
+electron.ipcRenderer.on("clipboard-content-image", (event, arg) => {
+    document.getElementsByTagName("body")[0].innerHTML = "<img/>";
+    document.getElementsByTagName("img")[0].setAttribute("src", arg)
+});
+electron.ipcRenderer.send("initiated", "oo");
+</script>

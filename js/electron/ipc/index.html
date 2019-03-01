@@ -1,0 +1,11 @@
+<html>
+    <body>
+        <button>change the title</button>
+        <script>
+            document.getElementsByTagName("button")[0].addEventListener("click", ()=>{
+                var timeString = (new Date()).toISOString();
+                require("electron").ipcRenderer.send("custom-time-send", timeString);
+            });
+        </script>
+    </body>
+</html>

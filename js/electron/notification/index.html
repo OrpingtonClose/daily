@@ -1,0 +1,12 @@
+<script>
+    require("electron").ipcRenderer.send("register-ipcrenderer", "ooo");
+    (n => {
+        require("electron").ipcRenderer.on("window-moved", () => {
+            n += 1;
+            new Notification(`Basic Notification nr ${n}`, {
+                title: `Basic Notification nr ${n}`,
+                body: "Short message part"
+            });
+        }); 
+    })(0);  
+</script>

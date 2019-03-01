@@ -1,0 +1,10 @@
+<script>
+    const electron = require("electron");
+    window.addEventListener("contextmenu", () => {
+        const menuLabelTexts = Object.getOwnPropertyNames(Object);
+        const menuLabels = menuLabelTexts.map(n => ({type: "normal",label: n}));
+        const myMenu = electron.remote.Menu.buildFromTemplate(menuLabels);
+        const win = electron.remote.getCurrentWindow();
+        myMenu.popup(win);
+    });    
+</script>

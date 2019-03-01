@@ -3,6 +3,8 @@ const path = require("path");
 
 const applicationWindows = {};
 
+("window-moved", "moved");
+
 electron.ipcMain.on("open-settings", (event, argument) => {
     applicationWindows.settings.show();
 });
