@@ -1,6 +1,7 @@
 rust/aaa/target/.rustc_info.json
 settings.json
-.vscode
+\.vscode/*
+\.node*
 js/data.db
-node_modules
+node_modules/
 package-lock.json
