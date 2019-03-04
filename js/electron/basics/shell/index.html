@@ -1,0 +1,35 @@
+<body>
+<a href="https://cnn.com">cnn.com</a>
+<div class="image">click: mouse image</div>
+<div class="image-in-folder">click: mouse image in folder</div>
+<span>tray --> links</span>
+</body>
+<script>
+const electron = require("electron");
+const url = require("url");
+let image;
+document.addEventListener("click", event => {
+    if (event.target.tagName === "A") {
+        var {protocol} = url.parse(event.target.href || "");
+        if (["https:", "http:"].includes(protocol)) {
+            event.preventDefault();
+            var result = electron.shell.openExternal("https://cnn.com");
+        }
+    }
+    
+    if (event.target.className === "image") {
+        electron.ipcRenderer.send("status", image);
+        var result = electron.shell.openExternal("file://" + image);
+        electron.ipcRenderer.send("status", "");
+    }
+    if (event.target.className === "image-in-folder") {
+        electron.ipcRenderer.send("status", "working");
+        var result = electron.shell.showItemInFolder(image);
+        electron.ipcRenderer.send("status", "");
+    }
+});
+electron.ipcRenderer.on("file-to-operate-on", (event, arg) => {
+    image = arg;
+});
+electron.ipcRenderer.send("ready-manual", "");
+</script>

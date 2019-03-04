@@ -1,0 +1,13 @@
+<div id="div-with-two">2</div>
+<button id="incrementor">increment</button>
+<button id="decrementor">increment</button>
+<div id="to-increment">0</div>
+<script>
+    (change => {
+        document.getElementById("incrementor").addEventListener("click", change(1));
+        document.getElementById("decrementor").addEventListener("click", change(-1));    
+    })(delta => () =>{
+        var pastVal = document.getElementById("to-increment").innerText;
+        document.getElementById("to-increment").innerText = parseInt(pastVal) + delta;
+    });
+</script>
