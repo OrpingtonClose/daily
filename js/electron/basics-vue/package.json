@@ -1,0 +1,14 @@
+{
+  "name": "basics-vue",
+  "version": "1.0.0",
+  "description": "https://learning.oreilly.com/library/view/jump-start-vuejs/9781492071303/Text/jsvuejs1-ch1.html#reactive-data",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "electron": "^4.0.7"
+  }
+}
