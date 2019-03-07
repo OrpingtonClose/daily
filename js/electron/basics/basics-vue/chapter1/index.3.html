@@ -1,0 +1,26 @@
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+    <table id="main"> 
+        <thead>
+            <th @click="sortBy = 'photoUrl'">photoUrl</th>
+            <th @click="sortBy = key" v-for="(value, key) in employees[0]" v-if="key !== 'photoUrl'">{{ key }}</th>
+            <!-- <th @click="sortBy = 'firstName'">First Name</th> -->
+        </thead>
+        <tbody>
+            <tr v-for="(employee, index) in sortedEmployees" :key="index">
+                <td>
+                    <img :src="employee.photoUrl" class="ui mini rounded image" />
+                </td>
+                <td>{{employee.firstName}}</td>
+                <td>{{employee.lastName}}</td>
+                <td>{{employee.email}}</td>
+                <td>{{employee.phone}}</td>
+                <td>{{employee.department}}</td>
+            </tr>
+            <tr v-if="employees.length === 0">
+                <td colspan="6">No employees found</td>
+            </tr>
+        </tbody>
+    </table>
+    <script src="renderer.js"></script>
+</body>
