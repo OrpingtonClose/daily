@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <button @click="toggleHideStatus">{{isHidden ? "too scary!" : "show ghost"}}</button>
+            <div id="ghost">
+                <div v-show="isHidden">
+                    I'm a ghost! Boo!
+                </div>
+            </div>
+        </div>  
+        <script>
+            new Vue({
+                el:"#app",
+                data: {
+                    isHidden: false
+                },
+                methods: {
+                    toggleHideStatus () {
+                        this.isHidden = !this.isHidden;
+                    }
+                }
+            });
+        </script>
+    </body>    
+</html>

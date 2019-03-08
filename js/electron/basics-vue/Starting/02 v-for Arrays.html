@@ -1,0 +1,23 @@
+<html>
+    <head>
+            <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <ul>
+                <li v-for="n in [10, 9, 8, 7, 6, 5, 4, 333]">{{ n }}</li>
+                <li>in v-for</li>
+            </ul>
+            <ul>
+                <li v-for="n in countdown">{{ n }}</li>
+                <li>in state</li>
+            </ul>            
+        </div>    
+        <script>
+            new Vue({
+                el:"#app", 
+                data: { countdown: [10, 9, 8, 7, 6, 5, 4, 333] }
+            });
+        </script>
+    </body>    
+</html>

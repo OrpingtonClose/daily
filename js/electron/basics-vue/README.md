@@ -10,3 +10,11 @@ npm install -g @vue/cli
 /home/orpington/.npm-global/bin/vue create my-new-project
 vue add @vue/cli-plugin-typescript
 vue add apollo
+
+echo 'export PATH=$PATH:~/.npm-global/bin' >> ~/.profile
+npm i -g @vue/cli
+npm i -g @vue/cli-service-global
+vue init webpack-simple wbs
+npm i
+npm run dev
+

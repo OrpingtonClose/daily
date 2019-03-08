@@ -28,9 +28,13 @@ electron.app.on("ready", ()=>{
             label: "close dev tools",
             type: "normal",
             click: () => win.webContents.closeDevTools()
+        },{
+            label: "reload",
+            type: "normal",
+            click: () => win.webContents.reload()
         }]
     };
-    const myMenu = [loadPages("chapter1"), devMenu];
+    const myMenu = [...["chapter1", "Starting", "Basic"].map(loadPages), devMenu];
     electron.Menu.setApplicationMenu(electron.Menu.buildFromTemplate(myMenu));  
     myMenu[0].submenu[0].click();
 });

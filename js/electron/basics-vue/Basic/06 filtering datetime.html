@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment-with-locales.js"></script>
+        <style type="text/css">
+            span {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            The storming of bastille happened on <span>{{bastilleStormingDate | date}}</span> or <span>{{bastilleStormingDate | date('fr')}}</span> in french
+        </div>  
+        <script>
+            Vue.filter("date", function(date, locale) {
+                moment.locale(locale || "en");
+                return moment(date).format("LL");
+            });
+            new Vue({
+                el:"#app",
+                data: {
+                    bastilleStormingDate: '1789-07-14 17 h'
+                }
+            });
+        </script>
+    </body>    
+</html>
