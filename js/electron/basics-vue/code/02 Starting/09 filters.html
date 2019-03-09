@@ -1,0 +1,18 @@
+<html>
+    <head>
+            <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">     
+            {{'hello world' | capitalize}}
+        </div>    
+        <script>
+            Vue.filter('capitalize', function(string){
+                return string.charAt(0).toUpperCase() + string.slice(1, string.length).toLowerCase();
+            });
+            new Vue({
+                el:"#app"
+            });
+        </script>
+    </body>    
+</html>

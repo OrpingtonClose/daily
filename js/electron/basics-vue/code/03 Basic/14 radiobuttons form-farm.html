@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <h3 v-if="farm.length">Your farm is composed of:</h3> 
+            <img  v-for="a in farm" :src="a"></src>
+            <form>
+                <fieldset>
+                    <legend>Todays animals</legend>
+                    <label>
+                        <input type="radio" v-model="animal" :value="animals[i]">
+                        <img :src="animals[i]">
+                    </label><br/>
+                    <label>
+                        <input type="radio" v-model="animal" :value="animals[i+1]">
+                        <img :src="animals[i+1]">
+                    </label><br/>
+                    <label>
+                        <input type="radio" v-model="animal" :value="animals[i+2]">
+                        <img :src="animals[i+2]">
+                    </label><br/>     
+                </fieldset>
+            </form>
+            <input type="submit" value="Add to Farm" @click.prevent="addToFarm">
+        </div>
+        <script>
+            new Vue({
+                el:"#app",
+                data: {
+                    animals: [
+                        "../../assets/pig.png",
+                        "../../assets/chicken.png",
+                        "../../assets/cow.png"
+                    ],
+                    animal: undefined,
+                    farm: [],
+                    i: 0
+                },
+                methods: {
+                    addToFarm () {
+                        if (!this.animal) { return }
+                        this.farm.push(this.animal);
+                        //this.i = Math.floor(Math.random() * (this.animals.lenght - 1));
+                        this.animal = "";
+                    }
+                }
+            });
+        </script>
+    </body>    
+</html>

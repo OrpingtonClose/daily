@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <h3 v-if="gender">your gender is {{gender}}</h3>
+            <form>
+                <fieldset>
+                    <legend>Choose your gender</legend>
+                    <label v-for="g in genders">
+                        <input type="radio" v-model="gender" :value="g">
+                        {{g[0].toUpperCase() + g.slice(1).toLowerCase() }}<br/>
+                    </label>
+                </fieldset>
+            </form>
+        </div>
+        <script>
+            new Vue({
+                el:"#app",
+                data: {
+                    genders: ["male", "female", "other"],
+                    gender: undefined
+                }
+            });
+        </script>
+    </body>    
+</html>

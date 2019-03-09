@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../assets/js/vue.js"></script>
+    <link href="../../assets/css/magic.css" rel="stylesheet" type="text/css">
+    <style>
+      .card {
+        position:relative;
+        background-color: floralwhite;
+        width: 9em;
+        height: 9em;
+        margin: 0.5em;
+        padding: 0.5em;
+        font-family: sans-serif;
+        box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.3);
+      }
+    </style>
+</head>
+<body>
+  <div id="app">
+    <button @click="showRecipe = !showRecipe">Recipe</button>
+    <button @click="showNews = !showNews">News</button>
+    <puff>
+      <article v-if="showRecipe" class="card">
+        <h3>Apple Pie Recipie</h3>
+        <p>Ingredients: apple pie. Procedure: serve hot:</p>
+      </article>
+    </puff>
+    <puff>
+      <article v-if="showNews" class="card">
+        <h3>Breaking news</h3>
+        <p>Coffee is both healthy and will shorten your lifespan significantly</p>
+      </article>    
+    </puff>
+  </div>
+  <script>
+    Vue.component("puff", {
+      functional: true,
+      render: function (createElement, context) {
+        var data = {
+          props: {
+            "enter-active-class": "magictime puffIn",
+            "leave-active-class": "magictime puffOut"
+          }
+        }
+        return createElement("transition", data, context.children)
+      }
+    });
+    new Vue({
+      el: '#app',
+      data: {
+        showRecipe: false,
+        showNews: false
+      }
+    });
+  </script>
+</body>
+</html>

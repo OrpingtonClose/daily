@@ -1,0 +1,38 @@
+<html>
+    <head>
+            <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <label>Legs: <input v-model="legCount" type="range" min="0" max="100"></label><br>
+            <label>Tops: <input @input="update" :value="tableCount"></label><br>
+            <output>
+                We are going to build {{legCount}} legs
+                and assembly {{tableCount}} tables.
+            </output>
+        </div>    
+        <script>
+            new Vue({
+                el:"#app", 
+                data: {
+                    legCount: 0
+                },
+                computed: {
+                    tableCount: {
+                        get () {
+                            return this.legCount / 4;
+                        },
+                        set (newValue) {
+                            this.legCount = newValue * 4;
+                        }
+                    }
+                },
+                methods: {
+                    update (e) {
+                        this.tableCount = e.target.value;
+                    }
+                }
+            });
+        </script>
+    </body>    
+</html>

@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <div>
+                    {{htmlTexts[0]}}
+            </div>
+            <br/>
+            <div v-html="htmlTexts[0]">
+            </div>
+            <thanks gift="Something" decoration="strong"></thanks>
+        </div>
+        <script>
+            Vue.component("thanks", {
+                functional: true,
+                render: function(createElement, context) {
+                    let decoratedGift = (p=> createElement(p.decoration, p.gift))(context.props);
+                    return createElement("p", ["thanks! ", decoratedGift]);
+                },
+                props: {
+                    gift: String,
+                    decoration: String
+                }
+            });
+            new Vue({
+                el:"#app",
+                data: {
+                    htmlTexts: [
+                        " you for the <pre>One person vs another</pre> DVD",
+                        " you for <i>Ghostbusters 3</i>!",
+                        "s <b>Gods of Egipt</b> is my new favorite!"
+                    ].map(t=>"Dear John,<br/>thank" + t),
+                }
+            });
+        </script>
+    </body>    
+</html>

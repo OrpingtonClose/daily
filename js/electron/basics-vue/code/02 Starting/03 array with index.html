@@ -1,0 +1,23 @@
+<html>
+    <head>
+            <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">     
+            <ul>
+                <li v-for="(animal, i) in animals">
+                    The {{animal}} goes {{sounds[i]}}
+                </li>
+            </ul>
+        </div>    
+        <script>
+            new Vue({
+                el:"#app", 
+                data: {
+                    animals: ["dog", "cat", "bird"],
+                    sounds: ["woof", "meow", "tweet"]
+                }
+            });
+        </script>
+    </body>    
+</html>

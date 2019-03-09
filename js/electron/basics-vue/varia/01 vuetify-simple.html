@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+  <link href="../../assets/css/vuetify.css" rel="stylesheet">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"> -->
+</head>
+<body>
+  <div id="app">
+    <v-navigation-drawer fixed v-model="visible" app>
+        <v-list dense>
+            <v-list-tile @click="">
+                <v-list-tile-action><v-icon>home</v-icon></v-list-tile-action>
+                <v-list-tile-content><v-list-tile-title>Button One</v-list-tile-title></v-list-tile-content>
+            </v-list-tile>
+            <v-list-tile @click="">
+                <v-list-tile-action><v-icon>contact_mail</v-icon></v-list-tile-action>
+                <v-list-tile-content><v-list-tile-title>Contact by mail</v-list-tile-title></v-list-tile-content>
+            </v-list-tile>
+        </v-list>
+    </v-navigation-drawer>
+    <v-toolbar>
+        <v-toolbar-side-icon @click.stop="visible = !visible"></v-toolbar-side-icon>
+        <v-toolbar-title>Title</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items>
+            <v-btn @click.stop="visible = !visible" flat>Link One</v-btn>
+            <v-btn @click.stop="visible = !visible" flat>Link Two</v-btn>
+            <v-btn @click.stop="visible = !visible" icon><v-icon>search</v-icon></v-btn>
+        </v-toolbar-items>
+    </v-toolbar>      
+    <v-app>
+      <v-content>
+        <v-container>
+                https://codepen.io/johnjleider/pen/rJdVMq<br/>
+                https://vuetifyjs.com/en/components/toolbars
+        </v-container>
+      </v-content>
+    </v-app>
+  </div>
+
+  <script src="../../assets/js/vue.js"></script>
+  <script src="../../assets/js/vuetify.js"></script>
+  <script>
+    new Vue({ el: '#app', data: {visible: undefined} })
+  </script>
+</body>
+</html>

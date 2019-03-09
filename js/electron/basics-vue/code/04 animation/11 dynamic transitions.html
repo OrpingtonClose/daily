@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../assets/js/vue.js"></script>
+    <style>
+      .fade-enter-active,
+      .fade-leave-active {
+        transition: opacity .5s;
+      }
+      .fade-enter,
+      .fade-leave-active {
+        opacity: 0;
+      }
+      .zoom-enter-active,
+      .zoom-leave-active {
+        transition: opacity .5s;
+      }
+      .fade-leave-active,
+      .zoom-enter {
+        transform: scale(0);
+      }  
+      p {
+        margin: 0;
+        position: absolute;
+        font-size: 6em;
+      }    
+    </style>
+</head>
+<body>
+  <div id="app">
+    <button @click="greetings++">Hi there!</button>
+    <transition :name="kindOfTransformation" :mode="transformationMode">
+      <p :key="transformation">{{transformation}}</p>
+    </transition>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        greetings: 0,
+        kindOfTransformation: "fade",
+        transformationMode: "in-out"
+      },
+      computed: {
+        transformation () {
+          if (this.greetings < 3) {
+            return "frog";
+          }
+          if (this.greetings <= 5) {
+            this.transformationMode = "out-in";
+            return "princess";
+          }          
+          this.kindOfTransformation = "zoom";
+          return "santa";          
+        }
+      }
+    });
+  </script>
+</body>
+</html>

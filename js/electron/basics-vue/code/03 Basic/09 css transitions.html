@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <style>
+            #solution {
+                cursor: pointer;
+            }
+            .fade-enter {
+                opacity: 0
+            }
+            .fade-enter-active {
+                transition: opacity .5s;
+            }
+            .fade-enter-to {
+                color: chartreuse;
+            }
+            /* .fade-leave {
+                color: darkblue;
+            } */
+            .tempor {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <article>
+                They call me fruit.<br>
+                They call me fish.<br>
+                They call me insect.<br>
+                But I'm not one of those.
+                <div id="solution" @click="showSolution = true">
+                    I'm a <transition name="fade">
+                        <span id="dragon" v-show="showSolution">Dragon</span>
+                    </transition><span class="tempor" v-show="!showSolution">click for answer</span>
+                </div>
+            </article>
+        </div>  
+        <script>
+            new Vue({
+                el:"#app",
+                data: {
+                    showSolution: false
+                }
+            });
+        </script>
+    </body>    
+</html>

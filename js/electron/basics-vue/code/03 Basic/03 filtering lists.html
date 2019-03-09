@@ -1,0 +1,65 @@
+<html>
+    <head>
+            <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <h3>list of expensive experiments</h3>
+            <ul>
+                <li v-for="exp in experiments">
+                    {{exp.name}} {{exp.cost}}m {{exp.field}}
+                </li>
+            </ul>
+            <h3>list of non-physics expensive experiments</h3>
+            <ul>
+                <li v-for="exp in nonPhysics(experiments)">
+                    {{exp.name}} {{exp.cost}}m {{exp.field}}
+                </li>
+            </ul>     
+            <h3>list of expensive experiments with custom exclusion</h3>
+            <input v-model="term">       
+            <ul>
+                <li v-for="exp in allExceptTerm">
+                    {{exp.name}} {{exp.cost}}m {{exp.field}}
+                </li>
+            </ul>                 
+            <h3>list of nonPhysics low-cost experiments</h3>
+            <ul>
+                <li v-for="exp in filteredExperiments">
+                    {{exp.name}} {{exp.cost}}m {{exp.field}}
+                </li>
+            </ul>                             
+        </div>    
+        <script>
+            new Vue({
+                el:"#app", 
+                data: {
+                    experiments: [ 
+                        {name: 'RHIC Ion Collider', cost: 650, field: 'Physics'}, 
+                        {name: 'Neptune Undersea Observatory', cost: 100, field: 'Biology'}, 
+                        {name: 'Violinist in the Metro', cost: 3, field: 'Psychology'}, 
+                        {name: 'Large Hadron Collider', cost: 7700, field: 'Physics'}, 
+                        {name: 'DIY Particle Detector', cost: 0, field: 'Physics'} 
+                    ],
+                    term: ""
+                },
+                methods: {
+                    nonPhysics(list) {
+                        return list.filter(exp => exp.field !== "Physics");
+                    },
+                    lowCost(list) {
+                        return list.filter(e=>e.cost <=3);
+                    }
+                },
+                computed: {
+                    filteredExperiments () {
+                        return this.lowCost(this.nonPhysics(this.experiments));
+                    },
+                    allExceptTerm () {
+                        return this.experiments.filter(exp => exp.field.indexOf(this.term) !== -1);
+                    }
+                }
+            });
+        </script>
+    </body>    
+</html>

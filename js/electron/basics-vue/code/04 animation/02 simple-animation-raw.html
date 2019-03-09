@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="../../assets/css/animate.css" rel="stylesheet">
+  <style>
+    .slideInRight {
+      transform: translateX(200px)
+    }
+    .go {
+      transition: all 2s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <button @click="taxiCalled = !taxiCalled">{{taxiCalled ? "lets go!" : "Call a cab"}}</button>
+    <transition enter-class="slideInRight" enter-active-class="go">
+      <p v-if="taxiCalled"><img src="../../assets/img/taxi.png" /></p>
+    </transition>
+  </div>
+
+  <script src="../../assets/js/vue.js"></script>
+  <script src="../../assets/js/vuetify.js"></script>
+  <script>
+    new Vue({ 
+      el: '#app', 
+      data: {
+        taxiCalled: false
+      }});
+  </script>
+</body>
+</html>

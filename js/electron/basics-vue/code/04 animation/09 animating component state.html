@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../assets/js/vue.js"></script>
+    <script src="../../assets/js/tween.js"></script>
+    <style>
+      .ball {
+        width: 3em;
+        height: 3em;
+        background-color: red;
+        border-radius: 50%;
+        position: absolute;
+        left: 20em;
+      }
+    </style>
+</head>
+<body>
+  <div id="app">
+    <h3>tween.js</h3>
+      JavaScript tweening engine for <br/>
+      easy animations, incorporating <br/>
+      optimised Robert Penner's equations.<br/>
+    <input type="number" @input="move">
+    <div class="ball" :style="'top: ' + height + 'em'"></div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        height: 0
+      },
+      methods: {
+        move (event) {
+          const newHeight = Number(event.target.value);
+          const vueInstance = this;
+          const animate = time => {
+            requestAnimationFrame(animate);
+            TWEEN.update(time);
+          }
+          new TWEEN.Tween({H: this.height}).easing(TWEEN.Easing.Bounce.Out).to({H: newHeight}, 1000).onUpdate(function(){
+            vueInstance.height = this.H;
+          }).start();
+          animate();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <style>
+            .warn {
+                background-color: mistyrose
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <div>object syntax:
+                <textarea v-model="memetext" :class="{warn: longText}" :maxlength="limit"></textarea>
+                {{memetext.length}}
+            </div>
+            <br>
+            <div>data syntax:
+                <textarea v-model="memetext" :class="classes" :maxlength="limit"></textarea>
+                {{memetext.length}}
+            </div>
+            <br>
+            <div>computed property syntax:
+                <textarea v-model="memetext" :class="classesComp" :maxlength="limit"></textarea>
+                {{memetext.length}}
+            </div>
+        </div>  
+        <script>
+            new Vue({
+                el:"#app",
+                data: {
+                    memetext: "What if I told you CSS can do that",
+                    limit: 50,
+                    classes: {warn: true}
+                },
+                computed: {
+                    longText() {
+                        return (this.limit - this.memetext.length) <= 10;
+                    },
+                    classesComp () {
+                        return {
+                            warn: (this.limit - this.memetext.length) <= 10
+                        }
+                    }
+                }
+            });
+        </script>
+    </body>    
+</html>

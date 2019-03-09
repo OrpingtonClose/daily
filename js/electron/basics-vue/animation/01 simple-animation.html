@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="../../assets/css/animate.css" rel="stylesheet">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"> -->
+</head>
+<body>
+  <div id="app">
+    <button @click="taxiCalled = !taxiCalled" >{{taxiCalled ? "lets go!" : "Call a cab"}}</button>
+    <transition enter-active-class="animated slideInRight" leave-active-class="animated slideOutLeft">
+      <p v-if="taxiCalled"><img src="../../assets/img/taxi.png" /></p>
+    </transition>
+  </div>
+
+  <script src="../../assets/js/vue.js"></script>
+  <script src="../../assets/js/vuetify.js"></script>
+  <script>
+    new Vue({ 
+      el: '#app', 
+      data: {
+        taxiCalled: false
+      }});
+  </script>
+</body>
+</html>

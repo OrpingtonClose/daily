@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="../../assets/css/animate.css" rel="stylesheet">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"> -->
+</head>
+<body>
+  <div id="app">
+      <v-parallax src="../../assets/material.jpg">
+      <div class="text-xs-center">
+          <v-menu offset-y origin="center center" transition="scale-transition">
+            <template v-slot:activator="{ on }">
+              <v-btn color="primary" dark v-on="on">Dropdown</v-btn>
+            </template>
+            <v-list>
+              <v-list-tile v-for="(item, index) in items" :key="index" @click="">
+                <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
+        </div>
+      </v-parallax>    
+      <v-parallax v-for="n in 9" src="../../assets/material.jpg"></v-parallax>      
+  </div>
+
+  <script src="../../assets/js/vue.js"></script>
+  <script src="../../assets/js/vuetify.js"></script>
+  <script>
+    new Vue({ el: '#app', data: {
+      visible: undefined,
+      items: [
+        { title: 'Click Me' },
+        { title: 'Click Me' },
+        { title: 'Click Me' },
+        { title: 'Click Me 2' }
+      ]
+      }
+    })
+  </script>
+</body>
+</html>

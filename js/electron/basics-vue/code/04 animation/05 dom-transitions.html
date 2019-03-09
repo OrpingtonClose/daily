@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../assets/js/vue.js"></script>
+    <style type="text/css">
+      .herpmerp-enter-active, .herpmerp-leave-active {
+        transition: opacity 2s;
+      }
+      .herpmerp-enter, .herpmerp-leave-active {
+        opacity: 0;
+      }
+      p {
+        font-size: 6em;
+        position: absolute;
+      }
+      p.one {
+        margin-block-start: 0em;
+      }
+      p.two {
+        margin-block-start: 1em;
+      }
+      p.three {
+        margin-block-start: 2em;
+      }                  
+    </style>
+</head>
+<body>
+  <div id="app">
+      <button @click="greetings++">Hi there {{greetings}}</button>
+      <transition name="herpmerp">
+        <p class="one" v-if="greetings < 3" key="frog">Frog (key)</p>
+        <p class="one" v-else-if="greetings >= 3 && greetings < 5" key="princess">princess (key)</p>
+        <p class="one" v-else key="santa">santa (key)</p>
+      </transition>
+      <br/>
+      <transition name="herpmerp">
+        <p class="two" v-if="greetings < 3">Frog</p>
+        <p class="two" v-else-if="greetings >= 3 && greetings < 5">princess</p>
+        <p class="two" v-else key="santa">santa</p>
+      </transition> 
+      <br/>
+      <transition name="herpmerp">
+        <p class="three" :key="transformation">{{transformation}} (js)</p>
+      </transition>      
+  </div>
+  <script>
+    new Vue({ 
+        el: '#app',
+        data: {
+          greetings: 0
+        },
+        computed: {
+          transformation () {
+            if (this.greetings < 3) {
+              return "frog";
+            }
+            if (this.greetings < 6) {
+              return "princess";
+            }
+            return "santa";
+          }
+        }
+    });
+  </script>
+</body>
+</html>

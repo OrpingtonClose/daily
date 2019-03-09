@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../assets/js/vue.js"></script>
+    <style>
+      .station-leave-active,
+      .station-enter-active {
+        transition: all 2s;
+        position: absolute;
+      }
+      .station-leave-to {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      .station-enter {
+        opacity: 0;
+        transform: tralnslate(30px);
+      }
+      .station-move {
+        transition: 2s;
+      }
+      span {
+        display: inline-block;
+        margin: 3px;
+      }
+    </style>
+</head>
+<body>
+  <div id="app">
+    <h3>Bus station simulation</h3>
+    <transition-group tag="p" name="station">
+      <span v-for="bus in buses" :key="bus"><img src="../../assets/img/bus.png"></span>
+    </transition-group>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        buses: [1, 2, 3, 4, 5],
+        nextBus: 6
+      },
+      mounted() {
+        setInterval(()=>{
+          if (Math.random() > 0.5 || this.buses.length === 0 ) {
+            this.buses.push(this.nextBus);
+            this.nextBus += 1;
+          } else {
+            this.buses.splice(0, 1);
+          }
+        }, 500);
+      }
+    });
+  </script>
+</body>
+</html>

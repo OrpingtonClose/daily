@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../assets/js/vue.js"></script>
+    <style>
+    .slide-enter-active,
+    .slide-leave-active {
+      transition: transform .5s
+    }
+    .slide-enter {
+      transform: translateX(300px)
+    }
+    .slide-leave-active {
+      transform: translateX(-300px)
+    }
+    p {
+      position: absolute;
+      margin: 0;
+      font-size: 3em;
+    }
+    </style>
+</head>
+<body>
+  <div id="app">
+    <button @click="product++">next</button>
+    <h3>out-in</h3>
+    <br/>
+    <transition name="slide" mode="out-in">
+      <img :key="products[product % 4]" :src="products[product % 4]"/>
+    </transition>
+    <h3>not out-in</h3>
+    <br/>
+    <transition name="slide">
+      <img :key="products[product % 4] + 10" :src="products[product % 4]"/>
+    </transition>    
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        product: 0,
+        products: ["umbrella", "computer", "ball", "camera"].map(i=>`../../assets/img/${i}.png`)      }
+    });
+  </script>
+</body>
+</html>

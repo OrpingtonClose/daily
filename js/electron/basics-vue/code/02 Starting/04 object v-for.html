@@ -1,0 +1,24 @@
+<html>
+    <head>
+            <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <ul>
+                <li v-for="(key, value) in animals">{{key}} goes {{value}}</li>
+            </ul>
+        </div>    
+        <script>
+            new Vue({
+                el:"#app", 
+                data: {
+                    animals: {
+                        dog: "woof",
+                        cat: "meow",
+                        bird: "tweet"
+                    }
+                }
+            });
+        </script>
+    </body>    
+</html>

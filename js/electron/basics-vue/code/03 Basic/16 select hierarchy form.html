@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">     
+            <form>
+                <fieldset>
+                    <legend>Choose your animal</legend>
+                    <select v-model="clan">
+                        <option v-for="(types, clan) in clans">{{clan}}</option>
+                    </select><br/>
+                    <select v-if="clans[clan]" v-model="type">
+                        <option v-for="(species, type) in clans[clan]">{{type}}</option>
+                    </select><br/>
+                    <select v-if="clans[clan] && clans[clan][type]" v-model="species">
+                        <option v-for="(animals, species) in clans[clan][type]">{{species}}</option>
+                    </select>
+                </fieldset>
+            </form>
+            <dev>clan: {{clan}}</dev><br/>
+            <dev>type: {{type}}</dev><br/>
+            <dev>species: {{species}}</dev>
+        </div>    
+        <script>
+            new Vue({
+                el:"#app", 
+                data: {
+                    clans: { mammalia: { 'have fingers': { human: 'human', 
+                                                           chimpanzee: 'chimpanzee' }, 
+                                         'fingerless': { cat: 'cat', 
+                                                         bear: 'bear' }}, 
+                             birds: { flying: { eagle: 'eagle', 
+                                                pidgeon: 'pidgeon' }, 
+                                      'non flying': { chicken: 'chicken' }}},
+                    clan: undefined,
+                    type: undefined,
+                    species: undefined
+                }
+            });
+        </script>
+    </body>    
+</html>

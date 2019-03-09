@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="../../assets/js/vue.js"></script>
+    <style>
+      img {
+        float: left;
+        padding: 5px;
+      }
+      .v-enter {
+        opacity: 0
+      }
+      .v-enter-active {
+        transition: opacity 2s
+      }
+    </style>
+</head>
+<body>
+  <h1>The Fill Murray page</h1>
+  <div id="app">
+    <transition appear>
+      <img src="../../assets/img/murray.jpg" width="50" height="70">
+    </transition>
+    <p>
+      The internet was missing the ability to provide custom 
+      sized placeholder images of this person here.
+    </p>    
+  </div>
+  <script>
+    new Vue({ 
+        el: '#app'
+    });
+  </script>
+</body>
+</html>
