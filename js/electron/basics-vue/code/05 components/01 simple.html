@@ -1,0 +1,57 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <style>
+            .dark-bulb {
+                background-color: darkblue;
+            }
+            .grey-bulb {
+                font-weight: bold;
+                font-size: 5em;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <light-bulb></light-bulb>
+            <light-bulb></light-bulb>
+            <light-bulb></light-bulb>
+            <dark-bulb></dark-bulb>
+            <dark-bulb></dark-bulb>
+            <dark-bulb></dark-bulb>
+            <grey-bulb></grey-bulb>
+            <grey-bulb></grey-bulb>
+            <grey-bulb></grey-bulb>
+        </div>
+        <script>
+            Vue.component("light-bulb", {
+                template: `
+                    <div class="light-bulb">
+                        <p>Eureka!</p>    
+                    </div>
+                `
+            });
+            var darkBulb = {
+                template: `
+                    <div class="dark-bulb">
+                        <p>Where am I!</p>    
+                    </div>
+                `
+            };
+            Vue.component("grey-bulb", {
+                functional: true,
+                render (createElement) {
+                    var attrs = {class: "grey-bulb"};
+                    var context = [createElement("p", "It's neither black or white!")];
+                    return createElement("div", attrs, context);
+                }
+            });
+            new Vue({
+                el:"#app",
+                components: {
+                    "darkBulb": darkBulb
+                }
+            });
+        </script>
+    </body>
+</html>

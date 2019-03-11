@@ -1,0 +1,40 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <script src="../../assets/js/vuetify.js"></script>
+        <link href="../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../assets/css/vuetify.css" rel="stylesheet">        
+    </head>
+    <body>
+        <div id="app">
+            <child v-for="i in 10" ref="junior" :num="i" :key="i"></child>
+            <p>Truth for child 4: {{child4Stomach}}</p>
+        </div>
+        <script>
+            Vue.component("child", {
+                template: "<p>Child: {{num}}: {{mouth}}</p>",
+                props: ['num'],
+                data() {
+                    return {
+                        mouth: "I didn't eat the cookie",
+                        stomach: `Yummy that ${this.num === 0 ? "nothing" : this.num === 1 ? "cookie" : "cookies"} ${this.num} was delicious`
+                    }
+                }
+            })
+            new Vue({
+                el:"#app",
+                data: {
+                    child4Stomach: "unknown"
+                },
+                mounted() {
+                    this.childStomach = this.$refs.junior[3].stomach;
+                },
+                methods: {
+                    change() {
+                        this.childStomach = this.$refs.junior.stomach;
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

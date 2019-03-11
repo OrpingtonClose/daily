@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <label>Sound Level</label>
+            <input type="number" v-model.number="soundLevel">
+            <sound-icon :level=soundLevel></sound-icon>
+        </div>
+        <script>
+            Vue.component("sound-icon", {
+                template: "<span>{{soundText[Math.min(Math.max(level, 0), soundText.length-1)]}}</span>",
+                props: ["level"],
+                data () {
+                    return {
+                        soundText: ["X", "O", "OO", "OOO"]
+                    }
+                }
+            });
+            new Vue({
+                el:"#app",
+                data: {
+                    soundLevel: 0
+                }
+            });
+        </script>
+    </body>
+</html>

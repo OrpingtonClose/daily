@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <script src="../../assets/js/vuetify.js"></script>
+        <link href="../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../assets/css/vuetify.css" rel="stylesheet">        
+        <style>
+            .super {
+                filter: hue-rotate(120deg)
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <man></man>
+            <cat></cat>
+        </div>
+        <script>
+            var mixin = {
+                data() {
+                    return {
+                        superPowers: false
+                    }
+                },
+                methods: {
+                    superMe(){
+                        this.$el.classList.add("super");
+                        this.superPowers = true;
+                    }
+                },
+                created() {
+                    this.$options.template =  `<div><h3 v-show="superPowers">super</h3>` +  
+                    this.$options.template + 
+                    `<button @click="superMe" v-if="!superPowers"> 
+                    Super! 
+                    </button></div>` 
+                }
+            }
+            Vue.component("man", {
+                template: `
+                    <p>man</p>
+                `,
+                mixins: [mixin]
+            });
+            Vue.component("cat", {
+                template: `
+                    <p>cat</p>
+                `,
+                mixins: [mixin]
+            });            
+            new Vue({
+                el:"#app"
+            });
+        </script>
+    </body>
+</html>

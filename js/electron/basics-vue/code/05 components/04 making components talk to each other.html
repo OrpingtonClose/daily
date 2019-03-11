@@ -1,0 +1,118 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <script src="../../assets/js/vuetify.js"></script>
+        <link href="../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../assets/css/vuetify.css" rel="stylesheet">        
+    </head>
+    <body>
+        <div id="app">
+            <v-breadcrumbs :items="[{text:'Discussion',disabled: true},{text: 'using shared variable',disabled: true}]">
+                <template v-slot:divider>
+                    <v-icon>forward</v-icon>
+                </template>
+            </v-breadcrumbs>
+            <v-chip color="indigo" text-color="white" label="true">
+                <v-avatar>
+                    <v-icon>account_circle</v-icon>
+                </v-avatar>
+                <blabber-simple></blabber-simple>
+            </v-chip>
+            <br/>
+            <v-chip color="success" text-color="black" label="true">
+                <v-avatar>
+                    <v-icon>account_circle</v-icon>
+                </v-avatar>
+                <blabber-simple></blabber-simple>
+            </v-chip>
+            <br/>
+            <br/>
+            <v-breadcrumbs :items="[{text:'Discussion',disabled: true},{text: 'using seperate vue instance as event bus',disabled: true}]">
+                    <template v-slot:divider>
+                        <v-icon>forward</v-icon>
+                    </template>
+                </v-breadcrumbs>            
+            <v-chip color="indigo" text-color="white" label="true">
+                <v-avatar>
+                    <v-icon>account_circle</v-icon>
+                </v-avatar>
+                <blabber :ice-breaker="true"></blabber>
+            </v-chip>
+            <br/>
+            <v-chip color="success" text-color="black">
+                <v-avatar>
+                    <v-icon>account_circle</v-icon>
+                </v-avatar>
+                <blabber></blabber>
+            </v-chip>
+        </div>
+        <script>
+            var bus = new Vue();
+            var line = 0;
+            Vue.component("blabber-simple", {
+                template: "<span>{{dialogue[currentLine]}}<span>",
+                mounted() {
+                    setInterval(()=>{
+                        this.currentLine = line % this.dialogue.length;
+                        line += 1;
+                    }, 2000)
+                },
+                data () {
+                    return {
+                        currentLine: 0,
+                        dialogue: [
+                            "hello", 
+                            "how are you?", 
+                            "fine thanks", 
+                            "let's go drink!", 
+                            "alright, where?", 
+                            "to hello's bar", 
+                            "hello?"
+                        ]
+                    }
+                }
+            });
+            Vue.component("blabber", {
+                template: "<span>{{dialogue[currentLine]}}<span>",
+                props: {
+                    iceBreaker: {
+                        type: Boolean,
+                        default: false
+                    }
+                },
+                mounted() {
+                    if (this.iceBreaker) {
+                        bus.$emit('line', 0);
+                    }
+                },
+                created() {
+                    bus.$on("line", line => {
+                        if (line !== this.currentLine) {
+                            setInterval(()=>{
+                                this.currentLine = (line + 1) % this.dialogue.length;
+                                bus.$emit('line', this.currentLine);
+                            }, 2000)
+                        }
+                    })
+                },
+                data () {
+                    return {
+                        currentLine: this.iceBreaker ? 0 : -1,
+                        dialogue: [
+                            "hello", 
+                            "how are you?", 
+                            "fine thanks", 
+                            "let's go drink!", 
+                            "alright, where?", 
+                            "to hello's bar", 
+                            "hello?"
+                        ]
+                    }
+                }
+            });
+            new Vue({
+                el:"#app"
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,77 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <script src="../../assets/js/vuetify.js"></script>
+        <script src="../../assets/js/vuex.js"></script>
+        <link href="../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../assets/css/vuetify.css" rel="stylesheet">        
+        <style>
+            .blabber {
+                width: 200px;
+                height: 40px;
+                background-color: gainsboro;
+                border: 1px solid gray;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <blabber></blabber> 
+            <blabber></blabber> 
+            <blabber></blabber> 
+        </div>
+        <script>
+            const store = new Vuex.Store({
+                strict: true,
+                state: { 
+                    currentActor: -1, 
+                    currentLine: -1, 
+                    actors: [], 
+                    dialogue: [ 
+                        "Where are you going?", 
+                        "To the cinema", 
+                        "What's on at the cinema?", 
+                        "'Quo vadis?'", 
+                        "Oh, what does it mean?" 
+                    ] 
+                },
+                mutations: {
+                    entersScene (state, uuid) {
+                        state.currentLine = (state.currentLine + 1) % state.dialogue.length;
+                        state.actors.push({uuid, line: state.dialogue[state.currentLine]});
+                        state.currentActor = (state.currentActor + 1) % state.actors.length;
+                    },
+                    nextLine (state) {
+                        state.currentActor = (state.currentActor + 1) % state.actors.length;
+                        state.currentLine = (state.currentLine + 1) % state.dialogue.length;
+                        state.actors[state.currentActor].line = state.dialogue[state.currentLine];
+                    }
+                }
+            });
+            Vue.component("blabber", {
+                template: "<div class='blabber'>{{currentLine}}</div>",
+                data () {
+                    return {
+                        uuid: Math.random()
+                    }
+                },
+                computed: {
+                    currentLine () {
+                        return store.state.actors.find(actor=> actor.uuid === this.uuid).line;
+                    }
+                },
+                created() {
+                    store.commit("entersScene", this.uuid);
+                }
+            })
+            new Vue({
+                el:"#app",
+                mounted() {
+                    setInterval(()=>{
+                        store.commit("nextLine");
+                    }, 2000);
+                }
+            });
+        </script>
+    </body>
+</html>

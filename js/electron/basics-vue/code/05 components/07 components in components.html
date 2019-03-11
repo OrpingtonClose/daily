@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <script src="../../assets/js/vuetify.js"></script>
+        <link href="../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../assets/css/vuetify.css" rel="stylesheet">        
+        <style>
+            .course {
+                border: 1px solid black;
+                background-color: whitesmoke;
+                margin: 10px;
+                padding: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <course :menu="menu1"></course>
+            <course :menu="menu2"></course>
+        </div>
+        <script>
+            Vue.component("dish", {
+                template: `
+                    <p class="dish">
+                        {{ham}} &lt;- Delicious!
+                    </p>
+                `,
+                props: ['ham']
+            });
+            Vue.component("course", {
+                template: `
+                    <section class="course">
+                        <dish v-for="ham in menu" :ham="ham" :key="ham"></dish>
+                    </section>
+                `,
+                props: {
+                    menu: {
+                        type: Array,
+                        required: true,
+                        validator (foodArray) {
+                            return foodArray.every(food => typeof food === "string" && foodArray.length === 4);
+                        }
+                    }
+                }
+            });            
+            new Vue({
+                el:"#app",
+                data: {
+                    menu1: ["apple", "banana", "avocado", "orange"],
+                    menu2: ["steak", "egg", "becon", "liver"]
+                }
+            });
+        </script>
+    </body>
+</html>

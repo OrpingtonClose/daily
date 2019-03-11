@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css' rel="stylesheet">
+    <script src="../../assets/js/vue.js"></script>
+    <script src="../../assets/js/vuetify.js"></script>
+    <link href="../../assets/css/vuetify.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <v-app id="inspire">
+            <v-navigation-drawer fixed v-model="drawer" app>
+                <v-list dense>
+                    <v-list-tile @click="showTable">
+                        <v-list-tile-action>
+                            <v-icon>folder_open</v-icon>
+                        </v-list-tile-action>
+                        <v-list-tile-content>
+                            <v-list-tile-title>Table</v-list-tile-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                    <v-list-tile @click="showList">
+                        <v-list-tile-action>
+                            <v-icon>widgets</v-icon>
+                        </v-list-tile-action>
+                        <v-list-tile-content>
+                            <v-list-tile-title>Card List</v-list-tile-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                    <v-list-tile @click="showCarusel">
+                            <v-list-tile-action>
+                                <v-icon>gavel</v-icon>
+                            </v-list-tile-action>
+                            <v-list-tile-content>
+                                <v-list-tile-title>Carusel</v-list-tile-title>
+                            </v-list-tile-content>
+                        </v-list-tile>                    
+                </v-list>
+            </v-navigation-drawer>
+            <v-toolbar color="indigo" dark fixed app>
+                <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+                <v-toolbar-title>https://vuetifyjs.com/en/examples/layouts/baseline</v-toolbar-title>
+            </v-toolbar>
+            <v-content>
+                <v-container fluid fill-height>
+                    <v-layout justify-center align-center>
+                        <v-flex text-xs-center>
+                                <v-container fluid grid-list-md>
+
+                                        <v-carousel v-if="centralScreen === 'carusel'">
+                                        <v-carousel-item v-for="(item,i) in items" :key="i" :src="item.src"></v-carousel-item>
+                                        </v-carousel>
+                            
+                                        <v-data-iterator v-if="centralScreen === 'list'" :items="desserts" :rows-per-page-items="rowsPerPageItems" :pagination.sync="pagination" content-tag="v-layout" row wrap>
+                                          <template v-slot:item="props">
+                                            <v-flex xs12 sm6 md4 lg3>
+                                              <v-card>
+                                                <v-card-title><h4>{{ props.item.name }}</h4></v-card-title>
+                                                <v-divider></v-divider>
+                                                <v-list dense>
+                                                  <v-list-tile>
+                                                    <v-list-tile-content>Calories:</v-list-tile-content>
+                                                    <v-list-tile-content class="align-end">{{ props.item.calories }}</v-list-tile-content>
+                                                  </v-list-tile>
+                                                  <v-list-tile>
+                                                    <v-list-tile-content>Fat:</v-list-tile-content>
+                                                    <v-list-tile-content class="align-end">{{ props.item.fat }}</v-list-tile-content>
+                                                  </v-list-tile>
+                                                  <v-list-tile>
+                                                    <v-list-tile-content>Carbs:</v-list-tile-content>
+                                                    <v-list-tile-content class="align-end">{{ props.item.carbs }}</v-list-tile-content>
+                                                  </v-list-tile>
+                                                  <v-list-tile>
+                                                    <v-list-tile-content>Protein:</v-list-tile-content>
+                                                    <v-list-tile-content class="align-end">{{ props.item.protein }}</v-list-tile-content>
+                                                  </v-list-tile>
+                                                  <v-list-tile>
+                                                    <v-list-tile-content>Iron:</v-list-tile-content>
+                                                    <v-list-tile-content class="align-end">{{ props.item.iron }}</v-list-tile-content>
+                                                  </v-list-tile>
+                                                </v-list>
+                                              </v-card>
+                                            </v-flex>
+                                          </template>
+                                        </v-data-iterator>
+                                      </v-container>
+
+                            <v-data-table v-if="centralScreen === 'table'" :headers="headers" :items="desserts" class="elevation-1">
+                                <template v-slot:items="props">
+                                    <td>{{ props.item.name }}</td>
+                                    <td class="text-xs-right">{{ props.item.calories }}</td>
+                                    <td class="text-xs-right">{{ props.item.fat }}</td>
+                                    <td class="text-xs-right">{{ props.item.carbs }}</td>
+                                    <td class="text-xs-right">{{ props.item.protein }}</td>
+                                    <td class="text-xs-right">{{ props.item.iron }}</td>
+                                </template>
+                            </v-data-table>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+            </v-content>
+            <v-footer color="indigo" height="44" app inset>
+                <span v-if="centralScreen === 'list'" class="white--text">https://vuetifyjs.com/en/components/data-iterator</span>
+                <span v-if="centralScreen === 'table'" class="white--text">https://vuetifyjs.com/en/components/data-tables</span>
+                <span v-if="centralScreen === 'carusel'" class="white--text">https://vuetifyjs.com/en/components/carousels</span>
+            </v-footer>
+        </v-app>      
+    </div>
+    <script>
+      new Vue({ el: '#app', data: {
+        drawer: null,
+        centralScreen: "table",
+        rowsPerPageItems: [4, 8, 12],
+        pagination: { rowsPerPage: 4 },
+        items: ["flowers/1.jpeg",
+                "flowers/2.jpeg", 
+                "flowers/3.jpeg", 
+                "flowers/4.jpeg"].map(url => ({src:`../../assets/img/${url}`})),
+        headers: [
+          {
+            text: 'Dessert (100g serving)',
+            align: 'left',
+            sortable: false,
+            value: 'name'
+          },
+          { text: 'Calories', value: 'calories' },
+          { text: 'Fat (g)', value: 'fat' },
+          { text: 'Carbs (g)', value: 'carbs' },
+          { text: 'Protein (g)', value: 'protein' },
+          { text: 'Iron (%)', value: 'iron' }
+        ],
+        desserts: [
+            ['Frozen Yogurt', 159, 6.0, 24, 4.0, "1%"],
+            ['Ice cream sandwich', 237, 9.0, 37, 4.3, '1%'],
+            ['Eclair', 262, 16.0, 23, 6.0, '7%'],
+            ['Cupcake', 305, 3.7, 67, 4.3, '8%'],
+            ['Gingerbread', 356, 16.0, 49, 3.9, '16%'],
+            ['Jelly bean', 375, 0.0, 94, 0.0, '0%'],
+            ['Lollipop', 392, 0.2, 98, 0, '2%'],
+            ['Honeycomb',408, 3.2, 87, 6.5, '45%'],
+            ['Donut', 452, 25.0, 51, 4.9, '22%'],
+            ['KitKat', 518, 26.0, 65, 7, '6%']
+        ].map(([name, calories, fat, carbs, protein, iron]) => ({name, calories, fat, carbs, protein, iron}))
+      },
+      methods: {
+          showTable() {
+            this.centralScreen = 'table';
+            this.drawer = false;
+          },
+          showList() {
+            this.centralScreen = 'list';
+            this.drawer = false;
+          },
+          showCarusel() {
+            this.centralScreen = 'carusel';
+            this.drawer = false;
+          }
+        }
+    })
+    </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <script src="../../assets/js/vuetify.js"></script>
+        <link href="../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../assets/css/vuetify.css" rel="stylesheet">
+    </head>
+    <body>
+        <div id="app">
+            <v-card><v-container fluid grid-list-lg><v-layout row wrap><v-flex xs12><v-card color="blue-grey darken-2" class="white--text"><v-card-title primary-title>
+                <printer num="2"></printer>
+            </v-card-title></v-card></v-flex></v-layout></v-container></v-card>
+            <v-card><v-container fluid grid-list-lg><v-layout row wrap><v-flex xs12><v-card color="blue-grey darken-2" class="white--text"><v-card-title primary-title>
+                <printer str="hurrr"></printer>
+            </v-card-title></v-card></v-flex></v-layout></v-container></v-card>
+            <v-card><v-container fluid grid-list-lg><v-layout row wrap><v-flex xs12><v-card color="blue-grey darken-2" class="white--text"><v-card-title primary-title>
+                <printer boo="true"></printer>
+            </v-card-title></v-card></v-flex></v-layout></v-container></v-card>
+            <v-card><v-container fluid grid-list-lg><v-layout row wrap><v-flex xs12><v-card color="blue-grey darken-2" class="white--text"><v-card-title primary-title>            
+                <printer :fun="() => 343"></printer>
+            </v-card-title></v-card></v-flex></v-layout></v-container></v-card>
+            <v-card><v-container fluid grid-list-lg><v-layout row wrap><v-flex xs12><v-card color="blue-grey darken-2" class="white--text"><v-card-title primary-title>            
+                <printer :arr="[1]"></printer>
+            </v-card-title></v-card></v-flex></v-layout></v-container></v-card>
+            <v-card><v-container fluid grid-list-lg><v-layout row wrap><v-flex xs12><v-card color="blue-grey darken-2" class="white--text"><v-card-title primary-title>            
+                <printer :obj="{a:4, b:4, c:55}"></printer>
+            </v-card-title></v-card></v-flex></v-layout></v-container></v-card>
+            <v-card><v-container fluid grid-list-lg><v-layout row wrap><v-flex xs12><v-card color="blue-grey darken-2" class="white--text"><v-card-title primary-title>
+                <printer num="2" str="hurrr" boo="true" :fun="() => 343" :arr="[1]" :obj="{a:4, b:4, c:55}"></printer>
+            </v-card-title></v-card></v-flex></v-layout></v-container></v-card>
+            <v-card><v-container fluid grid-list-lg><v-layout row wrap><v-flex xs12><v-card color="blue-grey darken-2" class="white--text"><v-card-title primary-title>
+                <printer :obj="Object"></printer>
+            </v-card-title></v-card></v-flex></v-layout></v-container></v-card>
+        </div>
+        <script>
+            Vue.component("printer", {
+                functional: true,
+                render (h, {props, children}) {
+                    var header = h("div", Object.keys(props).filter(p=>props[p]).join(", "), {class: "headline"});
+                    var body = h("pre", JSON.stringify(props, null, 4));
+                    return [header, h("br"), body, h("br")];
+                },
+                props: {
+                    num: {type: Number},
+                    str: {
+                        type: String,
+                        required: true,
+                        default: "this is obligatory",
+                        validator(value) {
+                            return value;
+                        }
+                    },
+                    boo: {type: Boolean},
+                    fun: {type: Function},
+                    obj: {type: Object},
+                    arr: {
+                        type: Array,
+                        required: true,
+                        default () { return ["don't", "skip", "this"]},
+                        validator(value) {
+                            return value;
+                        }                    
+                    }
+                },
+                data () {
+                    return {
+                        soundText: ["X", "O", "OO", "OOO"]
+                    }
+                }
+            });
+            new Vue({
+                el:"#app",
+                data: {
+                    soundLevel: 0
+                }
+            });
+        </script>
+    </body>
+</html>

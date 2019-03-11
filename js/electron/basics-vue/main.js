@@ -20,6 +20,7 @@ electron.app.on("ready", ()=>{
             win.setTitle(`${chapter}: ${title}`);
         };
         click.time = fs.statSync(filePath).mtimeMs;
+        click.path = filePath;
         filesWithTimes.push(click);
         return {type: "normal", label: title, click}
     };
