@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vuetify.js"></script>
+        <link href="../../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../../assets/css/vuetify.css" rel="stylesheet">        
+        <style>
+            span {
+                cursor: pointer;
+            }
+            body {
+                font-size: 2em;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <ul>
+                <taxon :tree="living" taxon="living"></taxon>
+            </ul>
+        </div>
+        <script>
+            var taxon = {
+                name: "taxon",
+                template: `
+                    <li>
+                        <div @click="toggle">
+                            {{taxon}}
+                            <span v-if="hasChildren">{{open ? "-" : "+"}}</span>
+                        </div>
+                        <ul v-show="open">
+                            <taxon v-for="(child, taxon) in tree" :tree="child" :taxon="taxon" :key="taxon"></taxon>
+                        </ul>
+                    </li>`, 
+                props: {
+                    tree: Object,
+                    taxon: String
+                },
+                data () {
+                    return {
+                        open: false
+                    };
+                },
+                computed: {
+                    hasChildren(){
+                        return this.tree !== null;
+                    }
+                },
+                methods: {
+                    toggle(){
+                        this.open = !this.open;
+                    }
+                }
+            };
+            new Vue({
+                el:"#app",
+                components: {taxon},
+                data: {living:{animals:{invertebrates:{crab:null,bee:null,ant:null},vertebrates:{fish:{shark:null},mammals:{rabbit:null,rat:null}}},plants:{flowering:{maize:null,paddy:null},'non-flowering':{algae:{seaweed:null,spirogyra:null},fungi:{yeast:null,mushroom:null},moss:null,fern:null}}}}
+            });
+        </script>
+    </body>
+</html>

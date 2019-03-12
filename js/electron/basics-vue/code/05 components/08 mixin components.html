@@ -13,7 +13,7 @@
     <body>
         <div id="app">
             <man></man>
-            <cat></cat>
+            <cat></cat>         
         </div>
         <script>
             var mixin = {
@@ -29,27 +29,48 @@
                     }
                 },
                 created() {
-                    this.$options.template =  `<div><h3 v-show="superPowers">super</h3>` +  
-                    this.$options.template + 
-                    `<button @click="superMe" v-if="!superPowers"> 
-                    Super! 
-                    </button></div>` 
+                    this.$options.template =  `<v-card>  
+                            ${this.$options.template}
+                            <v-card-title primary-title>
+                            <div>
+                                <div class="headline">{{text}}</div>
+                            </div>
+                        </v-card-title>
+                        <v-card-actions>
+                            <v-btn @click="superMe" v-if="!superPowers">Super!</v-btn>
+                            <v-btn v-show="superPowers">super</v-btn>
+                        </v-card-actions>
+                    </v-card>  
+                    ` 
                 }
             }
             Vue.component("man", {
                 template: `
-                    <p>man</p>
+                    <v-img :src="src" height="200px" width="200px"></v-img>
                 `,
+                data() {
+                    return {
+                        src: "../../assets/img/man.png",
+                        text: "man"
+                    }
+                },
                 mixins: [mixin]
             });
             Vue.component("cat", {
                 template: `
-                    <p>cat</p>
+                    <v-img :src="src" height="200px"></v-img>
                 `,
+                data() {
+                    return {
+                        src: "../../assets/img/cat.jpeg",
+                        text: "cat"
+                    }
+                },
                 mixins: [mixin]
             });            
             new Vue({
-                el:"#app"
+                el:"#app",
+                data: {show: true}
             });
         </script>
     </body>

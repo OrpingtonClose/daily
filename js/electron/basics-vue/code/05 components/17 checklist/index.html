@@ -1,0 +1,83 @@
+<html>
+    <head>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vuetify.js"></script>
+        <link href="../../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../../assets/css/vuetify.css" rel="stylesheet">        
+    <style>
+        .best-component {
+            border: 5px dashed dodgerblue;
+            width: 300px;
+            font-family: sans-serif;
+            text-align: center;
+            padding: 2px 0;
+            width: 200px;
+            background-color: aliceblue;
+        }
+        .ok, .cancel {
+            background-color: grey;
+            border: 1px black solid;
+        }
+    </style>
+    </head>
+    <body>
+        <div id="app">
+            <dialog-box command="confirmation"
+                        :cancellable="true"
+                        @cancel="msg = 'cancelled'"
+                        @ok="msg = 'confirmed'">
+                <span slot="icon">TRIANGLE HERE</span>
+                <span slot="message">Do you confirm</span>
+            </dialog-box>
+            <br/>
+            <dialog-box command="dosomething"
+                        :cancellable="true"
+                        @cancel="msg = 'cancelled'"
+                        @ok="msg = 'do'">
+                <span slot="icon">TRIANGLE HERE</span>
+                <span slot="message">Do you do?</span>
+            </dialog-box>
+            <br/>
+            <dialog-box command="aaaaa"
+                        @ok="msg = 'aaaaa'">
+                <span slot="icon">TRIANGLE HERE</span>
+                <span slot="message">Do you aaaaa</span>
+            </dialog-box>                        
+            <br/>
+            <p>Output: {{msg}}</p>
+        </div>
+        <script>
+            Vue.component("dialog-box", {
+                template: `
+                    <div class="best-component">
+                        <div class="icon">
+                            <slot name="icon"></slot>
+                        </div>
+                        <slot name="message"></slot>
+                        <div class="buttons">
+                            <button class="cancel" v-if="cancellable" @click="cancel()">Cancel</button>
+                            <button class="ok" @click="ok()">Ok</button>
+                        </div>
+                    </div>`,
+                    props: {
+                        command: String,
+                        cancellable: Boolean
+                    },
+                    methods: {
+                        cancel() {
+                            this.$emit("cancel", this.command);
+                        },
+                        ok() {
+                            this.$emit("ok", this.command);
+                        }
+                    }
+            });
+            new Vue({
+                el:"#app",
+                data: {
+                    msg: 'undefined'
+                }
+            });
+        </script>
+    </body>
+</html>

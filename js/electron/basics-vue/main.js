@@ -13,11 +13,14 @@ electron.app.on("ready", ()=>{
     var filesWithTimes = [];
 
     const screen = chapter => name => {
-        var title = name.replace(".html", "").replace(/[0-9]{2} /, "");
+        var title = name.replace("/index.html", "").replace(".html", "").replace(/[0-9]{2} /, "");
         var filePath = path.join(__dirname, "code", chapter, `${name}`);
         var click = () => {
             win.loadURL("file://" + filePath);
-            win.setTitle(`${chapter}: ${title}`);
+            console.log(`${chapter}: ${title}`)
+            win.webContents.once('dom-ready', () => {
+                win.setTitle(`${chapter}: ${title}`);
+            });
         };
         click.time = fs.statSync(filePath).mtimeMs;
         click.path = filePath;
@@ -27,11 +30,17 @@ electron.app.on("ready", ()=>{
     const loadPages = name => {
         var directory = path.join(__dirname, "code", name);
         var cleanLabel = name.replace(/\d{2} /, "");
-        var filesOfConsideration = fs.readdirSync(directory).filter(f=>f.endsWith("html"));
+        var allNodes = fs.readdirSync(directory);
+        var filesOfConsideration = allNodes.filter(f=>f.endsWith("html"));
+        var isDirectory = n => fs.statSync(path.join(directory, n)).isDirectory();
+        var hasIndexHtml = n => fs.existsSync(path.join(directory, n, "index.html"));
+        var isAlright = n => isDirectory(n) && hasIndexHtml(n);
+        var filesOfConsiderationInFolders = allNodes.filter(isAlright).map(d => path.join(d, "index.html"));
+        var nodesOfConsideration = filesOfConsideration.concat(filesOfConsiderationInFolders);
         return {
             label: cleanLabel,
             type: "submenu",
-            submenu: filesOfConsideration.map(screen(name))
+            submenu: nodesOfConsideration.map(screen(name))
         }
     };
     const devMenu = {
@@ -48,12 +57,12 @@ electron.app.on("ready", ()=>{
         },{
             label: "reload",
             type: "normal",
-            click: () => win.webContents.reload()
+            click: () => win.webContents.reloadIgnoringCache()
         }]
     };
-    var codeGroups = fs.readdirSync(path.join(__dirname, "code"));
-    const myMenu = [...codeGroups.map(loadPages), devMenu];
-    electron.Menu.setApplicationMenu(electron.Menu.buildFromTemplate(myMenu));  
+    const codeGroups = () => fs.readdirSync(path.join(__dirname, "code"));
+    const myMenu = () => electron.Menu.buildFromTemplate([...codeGroups().map(loadPages), devMenu]);
+    electron.Menu.setApplicationMenu(myMenu());
     filesWithTimes.reduce((prv, cur) => {
         if (prv) {
             return cur.time > prv.time ? cur : prv;
@@ -61,6 +70,9 @@ electron.app.on("ready", ()=>{
             return cur;
         }
     }, undefined)();
+    setInterval(()=>{
+        electron.Menu.setApplicationMenu(myMenu());
+    }, 2000);
     //myMenu[0].submenu[0].click();
 });
 electron.app.on("window-all-closed", electron.app.quit);

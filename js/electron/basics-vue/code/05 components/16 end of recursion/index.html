@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vuetify.js"></script>
+        <link href="../../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../../assets/css/vuetify.css" rel="stylesheet">        
+    </head>
+    <body>
+        <div id="app">
+            <matrioska></matrioska>
+        </div>
+        <script>
+            require('electron').remote.getCurrentWindow().openDevTools();
+            Vue.component("matrioska", {
+                template: "<p>Hello<matrioska></matrioska></p>"
+            });
+            new Vue({
+                el:"#app"
+            });
+        </script>
+    </body>
+</html>

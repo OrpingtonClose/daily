@@ -1,0 +1,46 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <script src="../../assets/js/vuetify.js"></script>
+        <link href="../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../assets/css/vuetify.css" rel="stylesheet">        
+    </head>
+    <body>
+        <div id="app">
+            <greeter></greeter>
+            <super-greeter></super-greeter>
+        </div>
+        <script>
+            var Greeter = {
+                template: `
+                    <p>{{message}}<v-btn @click="greet">greet</v-btn></p>
+                `,
+                data() {
+                    return {
+                        message: "..."
+                    }
+                },
+                methods: {
+                    greet() {
+                        this.message = "hello";
+                    }
+                }
+            }
+            var SuperGreeter = {
+                mixins: [Greeter],
+                template: `
+                    <p>{{message}}<v-btn @click="superGreet"></v-btn></p>
+                `,
+                methods: {
+                    superGreet() {
+                        this.message = "SUPER HELLO!"
+                    }
+                }
+            }
+            new Vue({
+                el:"#app",
+                components: {Greeter, SuperGreeter}
+            });
+        </script>
+    </body>
+</html>

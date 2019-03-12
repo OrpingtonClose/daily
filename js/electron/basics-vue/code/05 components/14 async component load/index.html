@@ -1,0 +1,67 @@
+<html>
+    <head>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vuetify.js"></script>
+        <link href="../../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../../assets/css/vuetify.css" rel="stylesheet">        
+        <style>
+        div {
+            text-align: center;
+        }
+        span {
+            font-weight: bold;
+            font-size: 4em;
+        }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <span v-if="loading">loading...</span>
+            <xuande-period-vase></xuande-period-vase>
+        </div>
+        <script>
+            Vue.component("XuandePeriodVase", (resolve, reject) => {
+                setTimeout(()=>{
+                    if (Math.random() > 0.5) {
+                        console.log("vase");
+                        resolve({
+                            template: `
+                            <div style="text-align: center; vertical-align: middle;">
+                                <img width="200px" src='../../../assets/img/vase.png'/><br/><span>Buy for only 4000000</span>
+                            </div>`,
+                            mounted() {
+                                this.$parent.$emit("loaded");
+                            }
+                        });
+                    } else {
+                        console.log("ball");
+                        resolve({
+                            template: `
+                            <div style="text-align: center; vertical-align: middle;">
+                                <img width="200px" src='../../../assets/img/ball.png'/><br/><span>Oh no! A ball! Save the vase!</span>
+                            </div>`,
+                            mounted() {
+                                this.$parent.$emit("loaded");
+                            }
+                        });                        
+                        //reject("Today is Sunday, Internet is closed");
+                    }
+                }, 1000);
+            });
+            setInterval(()=>{
+                location.reload();
+            }, 2000);
+            new Vue({
+                el:"#app",
+                data: {
+                    loading: true
+                },
+                created() {
+                    this.$on("loaded", () => {
+                        this.loading = false;
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>

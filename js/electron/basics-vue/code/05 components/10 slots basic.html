@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <script src="../../assets/js/vuetify.js"></script>
+        <link href="../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet">
+        <link href="../../assets/css/vuetify.css" rel="stylesheet">        
+        <style>
+            .frame {
+                border: 5px dashed dodgerblue;
+                width: 300px;
+            }
+            h3, figcaption {
+                font-family: sans-serif;
+                text-align: center;
+                padding: 2px 0;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <framed>
+                <cat :name="catName"></cat>
+            </framed>
+        </div>
+        <script>
+            Vue.component("cat", {
+                template: `
+                    <div>
+                        <figure>
+                            <img src="http://lorempixel.com/220/220/cats/"/>
+                            <figcaption>{{name}}</figcaption>
+                        </figure>
+                    </div>`,
+                props: ['name']
+            })
+            Vue.component("framed", {
+                template: `
+                <div class="frame">
+                    <h3>Russian cat mafia employee of the month</h3>
+                    <slot>Nothing framed</slot>
+                </div>`
+            })
+            new Vue({
+                el:"#app",
+                data: {
+                    names: ["Murzik", "Pushok", "Barsik", "Vaska", "Matroskin"]
+                },
+                computed: {
+                    catName() {
+                        var randomIndex = Math.floor(Math.random()*this.names.length);
+                        return this.names[randomIndex];
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

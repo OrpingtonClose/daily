@@ -1,0 +1,74 @@
+<html>
+    <head>
+        <script src="../../assets/js/vue.js"></script>
+        <style>
+            .organogram {
+                border: 5px dashed dodgerblue;
+                width: 300px;
+            }
+            .boss {
+                border: 5px double mediumvioletred;
+            }
+            .employee {
+                border: 2px outset lightgrey;
+            }
+            figcaption, h3 {
+                font-family: sans-serif;
+                text-align: center;
+                padding: 2px 0;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <organogram>
+                <div slot="boss">
+                    <figure>
+                        <img src="http://lorempixel.com/210/210/cats/1" />
+                        <figcaption>Sylwester</figcaption>
+                    </figure>
+                </div>
+                <cat slot="employee" :name="catName"></cat>
+            </organogram>
+        </div>
+        <script>
+            Vue.component("cat", {
+                template: `
+                    <div>
+                        <figure>
+                            <img src="http://lorempixel.com/220/220/cats/"/>
+                            <figcaption>{{name}}</figcaption>
+                        </figure>
+                    </div>`,
+                props: ['name']
+            });            
+            Vue.component("organogram", {
+                template: `
+                    <div class="organogram">
+                        <h3>Scratchy co.</h3>
+                        <div class="boss">
+                            <h3>Boss</h3>
+                            <slot name="boss">No boss</slot>
+                        </div>
+                        <div class="employee">
+                            <h3>Employee</h3>
+                            <slot name="employee">No employee</slot>
+                        </div>
+                    </div>`
+            });
+            new Vue({
+                el:"#app",
+                data: {
+                    names: ["Murzik", "Pushok", "Barsik", "Vaska", "Matroskin"]
+                },
+                computed: {
+                    catName() {
+                        var randomIndex = Math.floor(Math.random()*this.names.length);
+                        return this.names[randomIndex];
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
