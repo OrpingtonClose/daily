@@ -1,0 +1,32 @@
+<!-- https://github.com/ethereum/solc-js/issues/31 -->
+<!-- https://stackoverflow.com/questions/53795971/solidity-solidity-code-to-input-json-description -->
+<button>herp merp</button>
+<script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/list.js"></script>
+<script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/soljson-v0.4.18+commit.9cf6e910.js"></script>
+<script type="text/javascript" src="assets/js/wr.js"></script>
+<script>
+    var solc = wrapper(window.Module);
+
+    const CONTRACT_FILE = 'HelloWorld.sol'
+    var content = `pragma solidity ^0.4.18;
+        contract HelloWorld {
+        function displayMessage() constant returns (string) {
+            return "Whale hello there!";
+        }
+    }`;
+
+    const input = {
+        language: 'Solidity',
+        sources: {
+            [CONTRACT_FILE]: { content: content }
+        },
+        settings: {
+            outputSelection: {
+            '*': { '*': ['*'] }
+            }
+        }
+    }
+    const output = solc.compile(JSON.stringify(input));
+
+    document.getElementsByTagName("button")[0].innerText = output;
+</script>
