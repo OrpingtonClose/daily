@@ -1,32 +1,174 @@
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>          
+    </head>
+    <body>
+<div id="app">
+        <v-app id="inspire">
+                <v-navigation-drawer v-model="drawer" fixed app>
+                        <v-expansion-panel>
+                                <v-expansion-panel-content
+                                  v-for="(item,i) in 5"
+                                  :key="i"
+                                >
+                                  <template v-slot:header>
+                                    <div>Item</div>
+                                  </template>
+                                  <template>
+                              <v-expansion-panel>
+                                <v-expansion-panel-content
+                                  v-for="(item,i) in 5"
+                                  :key="i"
+                                >
+                                  <template v-slot:header>
+                                    <div>Item</div>
+                                  </template>
+                                  <v-card>
+                                    <v-card-text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</v-card-text>
+                                  </v-card>
+                                </v-expansion-panel-content>
+
+                              </v-expansion-panel>          
+                                  </template>
+                                  <br/>
+                                  <!-- <v-card>
+                                    <v-card-text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</v-card-text>
+                                  </v-card> -->
+                                </v-expansion-panel-content>
+                              </v-expansion-panel>                    
+                  <!-- <v-list dense>
+                    <v-list-tile @click="">
+                      <v-list-tile-action>
+                        <v-icon>home</v-icon>
+                      </v-list-tile-action>
+                      <v-list-tile-content>
+                        <v-list-tile-title>Home</v-list-tile-title>
+                      </v-list-tile-content>
+                    </v-list-tile>
+                    <v-list-tile @click="">
+                      <v-list-tile-action>
+                        <v-icon>contact_mail</v-icon>
+                      </v-list-tile-action>
+                      <v-list-tile-content>
+                        <v-list-tile-title>Contact</v-list-tile-title>
+                      </v-list-tile-content>
+                    </v-list-tile>
+                  </v-list> -->
+                </v-navigation-drawer>
+                <v-toolbar color="indigo" dark fixed app>
+                  <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+                  <v-toolbar-title>Application</v-toolbar-title>
+                </v-toolbar>
+                <v-content>
+                  <v-container fluid fill-height>
+                    <v-layout justify-center align-center>
+                      <v-flex text-xs-center>
+                        <v-tooltip left>
+                          <template v-slot:activator="{ on }">
+                            <button @click="compile()">{{solidityCode}}</button>
+                            <template>
+                                <v-treeview :items="compilationResultToTreeView"></v-treeview>
+                                <!-- <v-treeview :items="compilationResultToTreeView"></v-treeview> -->
+                            </template>
+                            <!-- <button>{{JSON.stringify(compilationResultToTreeView, null, 2)}}</button> -->
+                          </template>
+                            <!-- <template>
+                                <v-treeview :items="items"></v-treeview>
+                            </template> -->
+                        </v-tooltip>
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on }">
+                            <v-btn icon large href="https://codepen.io/johnjleider/pen/rJdVMq" target="_blank" v-on="on">
+                              <v-icon large>mdi-codepen</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Codepen</span>
+                        </v-tooltip>
+                      </v-flex>
+                    </v-layout>
+                  </v-container>
+                </v-content>
+                <v-footer color="indigo" app>
+                  <span class="white--text">&copy; 2017</span>
+                </v-footer>
+            </v-app>
+</div>
 <!-- https://github.com/ethereum/solc-js/issues/31 -->
 <!-- https://stackoverflow.com/questions/53795971/solidity-solidity-code-to-input-json-description -->
-<button>herp merp</button>
 <script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/list.js"></script>
 <script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/soljson-v0.4.18+commit.9cf6e910.js"></script>
 <script type="text/javascript" src="assets/js/wr.js"></script>
 <script>
-    var solc = wrapper(window.Module);
-
-    const CONTRACT_FILE = 'HelloWorld.sol'
-    var content = `pragma solidity ^0.4.18;
-        contract HelloWorld {
-        function displayMessage() constant returns (string) {
-            return "Whale hello there!";
-        }
-    }`;
-
-    const input = {
-        language: 'Solidity',
-        sources: {
-            [CONTRACT_FILE]: { content: content }
+    new Vue({
+        el:"#app", 
+        data: {
+            drawer: false,
+            compilationResult: {herp: {merp: ["something", "else"]}},
+            solidityCode: `pragma solidity ^0.4.18;
+                contract HelloWorld {
+                function displayMessage() constant returns (string) {
+                    return "Whale hello there!";
+                }
+            }`
         },
-        settings: {
-            outputSelection: {
-            '*': { '*': ['*'] }
+        computed: {
+            compilationResultToTreeView() {
+                //return [{id: 1,name: 'Applications :',children: [{ id: 2, name: 'Calendar : app' },{ id: 3, name: 'Chrome : app' },{ id: 4, name: 'Webstorm : app' }]}];
+                var objectToVuetifyTreeview = n => {
+                    var expandChildren = obj => {
+                        var result = [];
+                        if (typeof obj === "object") {
+                            for (key in obj) {
+                                n += 1;
+                                var child = obj[key];
+                                var children = expandChildren(child);
+                                if (children.length === 0) {
+                                    result.push({
+                                        id: n, 
+                                        name: key
+                                    });
+                                } else if (children.length === 1 && !children[0].children) {
+                                    result.push({
+                                        id: n, 
+                                        name: key + ":" + children[0].name
+                                    });
+                                } else {
+                                    result.push({
+                                        id: n, 
+                                        name: key, 
+                                        children
+                                    });
+                                }
+                            }
+                        } else {
+                            n += 1;
+                            result.push({
+                                id: n, 
+                                name: obj
+                            });
+                        }
+                        return result;
+                    }
+                    return expandChildren;
+                }
+                return objectToVuetifyTreeview(0)(this.compilationResult);
+            }
+        },
+        methods: {
+            compile() {
+                var solc = wrapper(window.Module);
+                const input = {
+                    language: 'Solidity',
+                    sources: { ['']: { content: this.solidityCode } },
+                    settings: { outputSelection: { '*': { '*': ['*'] } } }
+                }
+                this.compilationResult = JSON.parse(solc.compile(JSON.stringify(input)));
             }
         }
-    }
-    const output = solc.compile(JSON.stringify(input));
-
-    document.getElementsByTagName("button")[0].innerText = output;
+    });
 </script>
+</body>
+</html>
