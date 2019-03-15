@@ -1,17 +1,23 @@
-const {app, BrowserWindow, Menu} = require("electron");
+const {app, BrowserWindow, Menu, globalShortcut} = require("electron");
 var path = require("path");
 
 let mainWindow;
 
 app.on("ready", () => {
     mainWindow = new BrowserWindow({
-        width: 300,
-        height: 600,
+        width: 900,
+        height: 900,
         minWidth: 300,
         minHeight: 300,
-        show: false
+        show: false,
+        icon: path.join(__dirname, "assets", "img", "solidity.jpeg")
     });
     mainWindow.loadURL("file://" + path.join(__dirname, 'just-compile.html'));
+
+    globalShortcut.register('F5', () => {
+        mainWindow.webContents.reload();
+    });    
+
     mainWindow.once('ready-to-show', () => {
         Menu.setApplicationMenu(Menu.buildFromTemplate([
             {
@@ -20,15 +26,15 @@ app.on("ready", () => {
                 submenu: [
                     {
                         type: "normal", 
-                        label: "clear database",
-                        click: () => {
-                            mainWindow.webContents.send("delete-database", "");
-                        },
-                    },{
-                        type: "normal", 
                         label: "open devtools",
                         click: () => {
                             mainWindow.webContents.openDevTools();
+                        }
+                    },{
+                        type: "normal", 
+                        label: "reload",
+                        click: () => {
+                            mainWindow.webContents.reload();
                         }
                     }
                 ]
