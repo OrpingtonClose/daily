@@ -10,7 +10,10 @@ app.on("ready", () => {
         minWidth: 300,
         minHeight: 300,
         show: false,
-        icon: path.join(__dirname, "assets", "img", "solidity.jpeg")
+        icon: path.join(__dirname, "assets", "img", "solidity.jpeg"),
+        webPreferences: {
+            nodeIntegration: false
+        }
     });
     mainWindow.loadURL("file://" + path.join(__dirname, 'just-compile.html'));
 

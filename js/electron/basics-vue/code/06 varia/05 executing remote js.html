@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css' rel="stylesheet">
+    <link href="../../assets/css/vuetify.css" rel="stylesheet">
+    <style>
+        pre {
+            border: 5px double lightgrey;
+            font-family: sans-serif;
+            text-align: left;
+            padding: 2px 0;
+            width: 80%;
+            max-height: 200px;
+            overflow: hidden;
+            background-color: aqua;
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            white-space: pre-wrap;       /* css-3 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            white-space: -webkit-pre-wrap; /* Newer versions of Chrome/Safari*/
+            word-break: break-all;
+            white-space: normal;            
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <pre class="url">{{this.url}}</pre>
+        <br/>
+        <pre v-html="codeForHtml"></pre>
+        <br/>
+        <pre>{{JSON.stringify(codeExecutionResult.allVersions.slice(1, 3), null, 2)}}</pre>
+    </div>
+    <script src="../../assets/js/vue.js"></script>
+    <script src="../../assets/js/vuetify.js"></script>    
+    <script src="../../assets/js/axios.js"></script>    
+    <script>
+        new Vue({ 
+            el: '#app', 
+            data: {
+                url: "https://ethereum.github.io/solc-bin/bin/list.js",
+                code: undefined,
+                codeExecutionResult: undefined,
+                embeddedHtml: '<div>merp</div>'
+            },
+            computed: {
+                codeForHtml() {
+                    if (this.code) {
+                        return this.code.split("\n").join("<br/>");
+                    } else {
+                        return "";
+                    }
+                }
+            },
+            mounted() {
+                axios.get(this.url).then(result => {
+                    this.code = result.data;
+                    this.codeExecutionResult = eval(this.code);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

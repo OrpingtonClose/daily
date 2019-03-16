@@ -1,0 +1,131 @@
+<html>
+    <head>
+        <link href="../../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet"/>
+        <link href="../../../assets/css/vuetify.css" rel="stylesheet"/>
+    </head>
+    <body>
+        <div id="app">
+            <v-app id="inspire">
+                <v-navigation-drawer width="150" permanent fixed app>
+                    <router-view name="list"></router-view>
+                </v-navigation-drawer>
+                
+                <v-toolbar color="indigo" dark fixed app>
+                    <v-toolbar-title>Second hand hardware</v-toolbar-title>
+                </v-toolbar>
+
+                <v-content>
+                    <v-container fluid fill-height>
+                        <v-layout justify-start>
+                            <v-flex text-xs-left>
+                                <router-view></router-view>
+                            </v-flex>
+                        </v-layout>
+                    </v-container>
+                </v-content>
+
+            </v-app>
+        </div>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vue-router.js"></script>
+        <script src="../../../assets/js/vuetify.js"></script>
+        <script>
+            Vue.use(VueRouter);
+            Vue.component("own-list-item", {
+                template: `
+                    <v-list-tile :to="to" :inactive="inactive" @click="">
+                        <v-list-tile-content>
+                            <v-list-tile-title><slot/></v-list-tile-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                `,
+                props: ["inactive", "to"]
+            });
+            Vue.component("own-body", {
+                props: {
+                    head: String,
+                    items: Array,
+                    to: Array
+                },
+                template: `
+                <div id="e3" style="max-width: 400px; margin: auto;" class="grey lighten-3">
+                    <v-toolbar dark>
+                        <v-toolbar-title>{{head}}</v-toolbar-title>
+                    </v-toolbar>
+                    <v-card>
+                        <v-container fluid grid-list-lg>
+                            <v-layout row wrap>
+                                <v-flex xs12>
+                                    <v-hover v-for="(item, i) in items">>
+                                        <v-card slot-scope="{ hover }"
+                                                :class="\`elevation-\${hover ? 18 : 2}\`"
+                                                :to="to && i < to.length ? to[i] : ''"
+                                                :key="i" 
+                                                :color="hover ? 'success' : 'blue-grey darken-2'" 
+                                                class="white--text">
+                                            <v-card-text>
+                                                <!-- <h3  v-if="hover && to && i < to.length" class="mb-0">{{item}}</h3> -->
+                                                <div v-if="hover && to && i < to.length" class="headline mb-0">{{item}}</div>
+                                                <div v-else>{{item}}</div>
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-hover>
+                                </v-flex>
+                            </v-layout>
+                        </v-container>
+                    </v-card>
+                </div>
+                `
+            });            
+            const ComputerDetail = {
+                template: `
+                    <own-body head="Computer Detail" :items="['Pentium AlotMhz, CDs sold seperately']"></own-body>
+                `      
+            };
+            const Parts = {
+                template: `
+                    <own-body head="Computer Parts" :items="['Computer', 'CD-ROM']" :to="['/computer']"></own-body>
+                `                
+            };
+            const Dogs = {
+                template: `
+                    <own-body head="Dogs" :items="['Boxer', 'Shnaucer', 'Terrier']"></own-body>
+                `
+            };
+            const List = {
+                template: `
+                    <v-list dense>
+                        <own-list-item inactive>Shopping List:</own-list-item>
+                        <own-list-item to="/">Computer</own-list-item>
+                        <own-list-item to="/dogs">Dogs</own-list-item>
+                    </v-list>
+                `
+            }
+            const router = new VueRouter({
+                routes: [{
+                    path: "/",
+                    components: {
+                        default: Parts,
+                        list: List
+                    }
+                },{
+                    path: "/computer",
+                    components: {
+                        default: ComputerDetail,
+                        list: List
+                    }
+                },{
+                    path: "/dogs",
+                    components: {
+                        default: Dogs,
+                        list: List
+                    }
+                }]
+            });
+            new Vue({
+                el:"#app",
+                router
+            });
+        </script>
+    </body>
+</html>

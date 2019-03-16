@@ -9,16 +9,16 @@
             <v-app id="inspire">
                 <v-navigation-drawer v-model="drawer" fixed app>
                     <v-list dense>
-                        <v-list-tile @click="drawer = !drawer; compile()">
+                        <v-list-tile v-for="(fullname, version) in compilerVersions" @click="drawer = !drawer; compile()">
                             <v-list-tile-content>
-                                <v-list-tile-title>Compile</v-list-tile-title>
+                                <v-list-tile-title>{{version}}</v-list-tile-title>
                             </v-list-tile-content>
                         </v-list-tile>
                     </v-list>
                 </v-navigation-drawer>
                 <v-toolbar color="indigo" dark fixed app>
                     <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-                    <v-toolbar-title>Solidity {{compilerRequired}}</v-toolbar-title>
+                    <v-toolbar-title>Solidity {{compilerRequired()}}</v-toolbar-title>
                   <v-spacer></v-spacer>
                     <v-btn light @click="constantCompilation = !constantCompilation" icon>
                            {{ constantCompilation ? "stop compiling" : "compile" }} 
@@ -90,25 +90,41 @@
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>          
         <script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/list.js"></script>
-        <script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/soljson-v0.4.18+commit.9cf6e910.js"></script>
+
+        <!-- <script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/soljson-v0.4.18+commit.9cf6e910.js"></script> -->
+        <!-- <script type="text/javascript" :src="https://ethereum.github.io/solc-bin/bin/{{compilerVersions[compilerRequired]}}"></script> -->
         <script type="text/javascript" src="assets/js/wr.js"></script>
+
         <script>
-            // Vue.filter('errorHeader', );
-            // Vue.filter('errorBody', function(errorObj){
-            //     var msg = errorObj.formattedMessage;
-            //     if (msg) {
-            //         return msg.split(":").slice(1, 4).join(":");
-            //     } else {
-            //         return "";
-            //     }
-                
-            // });            
+   
             new Vue({
                 el:"#app", 
                 watch: {
                     solidityCode: function(oldcode, newCode){
                         this.compile();
+                    },
+                    currentCompilerVersion: function(newVersion, oldVersion) {
+                        alert(newVersion);
+                        alert(oldVersion);
+                        (function(d, script) {
+                            script = d.createElement('script');
+                            script.type = 'text/javascript';
+                            script.async = false;
+                            script.onload = function(){
+                                // remote script has loaded
+                            };
+                            script.src = 'https://ethereum.github.io/solc-bin/bin/soljson-v0.4.18+commit.9cf6e910.js';
+                            d.getElementsByTagName('head')[0].appendChild(script);
+                            // script1 = d.createElement('script');
+                            // script1.type = 'text/javascript';
+                            // script1.async = true;
+                            // script1.src = "assets/js/wr.js";
+                            // d.getElementsByTagName('head')[0].appendChild(script1);                            
+                        }(document));
                     }
+                },
+                mounted() {
+                    this.compilerVersions = soljsonReleases;
                 },
                 filters: {
                     errorHeader: function(errorObj){
@@ -124,6 +140,8 @@
                     }
                 },
                 data: {
+                    currentCompilerVersion: undefined,
+                    compilerVersions: undefined,
                     constantCompilation: true,
                     sheet: false,
                     drawer: false,
@@ -157,17 +175,6 @@
                             }
                         }
                         return false;
-                    },                    
-                    compilerRequired() {
-                        var result = "";
-                        if (this.solidityCode.startsWith("pragma")) {
-                            var pragmaDirective = this.solidityCode.split(";")[0];
-                            var matches = /[0-9\.]+/.exec(pragmaDirective);
-                            if (matches) {
-                                result = matches[0];
-                            }
-                        }
-                        return result;
                     },
                     compiledContractBytecode() {
                         var res = this.compilationResult;
@@ -192,54 +199,25 @@
                         } else {
                             return "";
                         }
-                    },
-                    compilationResultToTreeView() {
-                        //return [{id: 1,name: 'Applications :',children: [{ id: 2, name: 'Calendar : app' },{ id: 3, name: 'Chrome : app' },{ id: 4, name: 'Webstorm : app' }]}];
-                        var objectToVuetifyTreeview = n => {
-                            var expandChildren = obj => {
-                                var result = [];
-                                if (typeof obj === "object") {
-                                    for (key in obj) {
-                                        n += 1;
-                                        var child = obj[key];
-                                        var children = expandChildren(child);
-                                        if (children.length === 0) {
-                                            result.push({
-                                                id: n, 
-                                                name: key
-                                            });
-                                        } else if (children.length === 1 && !children[0].children) {
-                                            result.push({
-                                                id: n, 
-                                                name: key + ":" + children[0].name
-                                            });
-                                        } else {
-                                            result.push({
-                                                id: n, 
-                                                name: key, 
-                                                children
-                                            });
-                                        }
-                                    }
-                                } else {
-                                    n += 1;
-                                    result.push({
-                                        id: n, 
-                                        name: obj
-                                    });
-                                }
-                                return result;
-                            }
-                            return expandChildren;
-                        }
-                        return objectToVuetifyTreeview(0)(this.compilationResult);
                     }
                 },
-                methods: {
+                methods: {                   
+                    compilerRequired() {
+                        var result = "";
+                        if (this.solidityCode.startsWith("pragma")) {
+                            var pragmaDirective = this.solidityCode.split(";")[0];
+                            var matches = /[0-9\.]+/.exec(pragmaDirective);
+                            if (matches) {
+                                result = matches[0];
+                            }
+                        }
+                        return result;
+                    },
                     escapeHelper (str) {
                         return escape(str);
                     },
                     compile() {
+                        wrapper = require("./wrapper");
                         var solc = wrapper(window.Module);
                         const input = {
                             language: 'Solidity',

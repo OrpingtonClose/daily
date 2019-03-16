@@ -1,0 +1,70 @@
+<html>
+    <head>
+    </head>
+    <body>
+        <div id="app">
+            <h1>Kindgdom Encyclopedia</h1>
+            <router-link to="/user/Stark/">Stark</router-link>
+            <router-link to="/user/Lannister/">Lannister</router-link>
+            <router-view></router-view>
+        </div>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vue-router.js"></script>
+        <script>
+            Vue.use(VueRouter);
+            var User = {
+                template: `
+                    <div class="user">
+                        <h1>Kingdoms Encyclopedia</h1>
+                        User {{$route.params.id}}
+                        <router-link to="gold">Gold</router-link>
+                        <router-link to="soldiers">Soldiers</router-link>
+                        <router-view></router-view>
+                    </div>
+                `
+            };
+            var Soldiers = {
+                template: `
+                    <div class="soldiers">
+                        <span v-for="soldier in $root[$route.params.id].soldiers">
+                            <img href="../../../assets/img/sword.png"/>
+                        </span>
+                    </div>
+                `    
+            };
+            var Gold = {
+                template: `
+                    <div class="gold">
+                        <span v-for="soldier in $root[$route.params.id].gold">
+                            <img href="../../../assets/img/sack-of-gold.png"/>
+                        </span>
+                    </div>
+                `
+            };            
+            const router = new VueRouter({
+                routes: [{
+                    path: "/users/:id", 
+                    component: User,
+                    children: [
+                        {path: "soldiers", component: Soldiers},
+                        {path: "gold", component: Gold}
+                    ]
+                }]
+            });
+            new Vue({
+                router,
+                el:"#app",
+                data: {
+                    Stark: {
+                        soldiers: 100,
+                        gold: 50  
+                    },
+                    Lannister: {
+                        soldiers: 50,
+                        gold: 100
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
