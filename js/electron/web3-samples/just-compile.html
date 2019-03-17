@@ -3,210 +3,209 @@
         <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+        <style>
+            .activatable-tile {
+                color: black;
+            }
+            .activatable-tile:hover {
+                background: green;
+                color: azure;
+            }
+        </style>
     </head>
     <body>
         <div id="app">
             <v-app id="inspire">
-                <v-navigation-drawer v-model="drawer" fixed app>
-                    <v-list dense>
-                        <v-list-tile v-for="(fullname, version) in compilerVersions" @click="drawer = !drawer; compile()">
-                            <v-list-tile-content>
-                                <v-list-tile-title>{{version}}</v-list-tile-title>
-                            </v-list-tile-content>
-                        </v-list-tile>
-                    </v-list>
-                </v-navigation-drawer>
                 <v-toolbar color="indigo" dark fixed app>
-                    <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-                    <v-toolbar-title>Solidity {{compilerRequired()}}</v-toolbar-title>
-                  <v-spacer></v-spacer>
-                    <v-btn light @click="constantCompilation = !constantCompilation" icon>
-                           {{ constantCompilation ? "stop compiling" : "compile" }} 
-                        <v-icon>refresh</v-icon>
-                    </v-btn>
+                    <v-toolbar-title>Solidity: {{compilerVersion}}</v-toolbar-title>
                 </v-toolbar>
                 <v-content>
                     <v-container fluid fill-height>
                         <v-layout justify-center align-content-end>
                             <v-flex xs12>
-                                <!-- <v-textarea v-on:change="compile()" no-resize auto-grow outline name="input-7-4" label="solidity:" v-model="solidityCode"></v-textarea> -->
-                                <v-textarea :error-messages="isCompilerVersionNeededErrorMessage" 
-                                            no-resize 
+                                <v-textarea no-resize 
                                             auto-grow 
                                             outline 
                                             label="solidity:" 
                                             v-model="solidityCode"></v-textarea>
-                                <!-- <v-textarea no-resize auto-grow outline name="input-7-4" :value="JSON.stringify(compilationErrors, null, 2)"></v-textarea></span> -->
-                                
-                                <v-container fluid grid-list-lg>
-                                    <v-layout row wrap>
-                                        <v-flex v-for="error in compilationErrors">
-                                            <v-card :color="error.severity === 'error' ? '#ff9e80' : '#e0e0e0'" hover elevation=10> 
-                                                <v-card-title primary-title>
-                                                    <div>
-                                                        <h3 class="headline mb-0">{{error | errorHeader}}</h3>
-                                                        <div v-for="(msg, i) in error.formattedMessage.split('\n')">{{msg | errorBody(i)}}</div>
-                                                    </div>
-                                                </v-card-title>
-                                            </v-card>
-                                        </v-flex>
-                                    </v-layout>
-                                </v-container>
+                                <error-boxes :compilation-errors="compilationErrors">
                             </v-flex>
                         </v-layout>
                     </v-container>
                 </v-content>
-
-                <!-- <v-bottom-sheet hide-overlay lazy persistent   v-model="sheet"> -->
-                <!-- <v-bottom-sheet hide-overlay lazy persistent v-if="!compilationHasErrors"> -->
-                    
                 <v-bottom-sheet hide-overlay persistent v-model="compilationHasNoErrors">
-                    <v-list>
-                    <!-- <v-list three-line> -->
-                        <!-- <v-list-tile key="abi" @click="sheet = false"> -->
-                        <v-list-tile key="abi">    
-                            <v-list-tile-action>
-                                <v-icon color="pink">star</v-icon>
-                            </v-list-tile-action>
-                            <v-list-tile-content>
-                                <v-list-tile-title>abi</v-list-tile-title>
-                                <v-list-tile-sub-title>{{compiledContractAbi}}</v-list-tile-sub-title>
-                            </v-list-tile-content>
-                        </v-list-tile>
-                        <!-- <v-list-tile key="bytecode" @click="sheet = false"> -->
-                        <v-list-tile key="bytecode">    
-                            <v-list-tile-action>
-                                <v-icon color="pink">star</v-icon>
-                            </v-list-tile-action>
-                            <v-list-tile-content>
-                                <v-list-tile-title>bytecode</v-list-tile-title>
-                                <v-list-tile-sub-title>{{compiledContractBytecode}}</v-list-tile-sub-title>
-                            </v-list-tile-content>
-                        </v-list-tile>        
-                    </v-list>
+                    <v-hover v-for="contract in compiledContracts">
+                        <template slot-scope="{ hover }">
+                            <v-list v-if="hover" dark>
+                                <compilation-results :contract="contract"></compilation-results>
+                            </v-list>
+                            <v-list v-else>
+                                <compilation-results :contract="contract"></compilation-results>
+                            </v-list>                            
+                        </template>
+                    </v-hover>
                 </v-bottom-sheet>
-                <!-- <v-footer color="indigo" app>
-                    <span class="white--text">&copy; 2017</span>
-                </v-footer> -->
             </v-app>
         </div>
-        <!-- https://github.com/ethereum/solc-js/issues/31 -->
-        <!-- https://stackoverflow.com/questions/53795971/solidity-solidity-code-to-input-json-description -->
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>          
-        <script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/list.js"></script>
-        <!-- <script type="text/javascript" src="./assets/js/solc/wrapper.js"></script> -->
-        
-        <!-- <script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/soljson-v0.4.18+commit.9cf6e910.js"></script> -->
-        <!-- <script type="text/javascript" :src="https://ethereum.github.io/solc-bin/bin/{{compilerVersions[compilerRequired]}}"></script> -->
-        <!-- <script type="text/javascript" src="assets/js/wr.js"></script> -->
-        <script src="assets/js/browser-solc.js" type="text/javascript"></script>
-        <!-- <script src="http://code.dappbench.com/browser-solc.min.js" type="text/javascript"></script> -->
-
+        <script type="text/javascript" src="https://ethereum.github.io/solc-bin/bin/soljson-latest.js"></script>
+        <script type="text/javascript" src="assets/js/wr.js"></script> 
         <script>
-   
+            var errorBoxesComponent = {
+                template:`
+                <v-container fluid grid-list-lg>
+                    <v-layout row wrap>
+                        <v-flex v-for="error in compilationErrors">
+                            <v-card :color="error.severity === 'error' ? '#ff9e80' : '#e0e0e0'" hover elevation=10> 
+                                <v-card-title primary-title>
+                                    <div>
+                                        <h3 class="headline mb-0">{{error | errorHeader}}</h3>
+                                        <div v-for="(msg, i) in error.formattedMessage.split('\\n')">{{msg | errorBody(i)}}</div>
+                                    </div>
+                                </v-card-title>
+                            </v-card>
+                        </v-flex>
+                    </v-layout>
+                </v-container>`,
+                props: ["compilation-errors"]
+            }
+            var compilationResultsComponent = {
+                template: `
+                <div>
+                    <v-list-tile    class="activatable-tile"
+                                    key="abi{{contract.name}}" 
+                                    @click="putToClipboard(contractAbi(contract))">    
+                        <v-list-tile-action>
+                            <v-icon color="pink">star</v-icon>
+                        </v-list-tile-action>
+                        <v-list-tile-content>
+                            <v-list-tile-title>abi {{contract.name}}</v-list-tile-title>
+                            <v-list-tile-sub-title>{{contract | contractAbi}}</v-list-tile-sub-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                    <v-list-tile    class="activatable-tile"
+                                    key="bytecode{{contract.name}}" 
+                                    @click="putToClipboard(contractBytecode(contract))">
+                        <v-list-tile-action>
+                            <v-icon color="pink">star</v-icon>
+                        </v-list-tile-action>
+                        <v-list-tile-content>
+                            <v-list-tile-title>bytecode {{contract.name}}</v-list-tile-title>
+                            <v-list-tile-sub-title>{{contract | contractBytecode}}</v-list-tile-sub-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                </div>`,
+                props: ['contract'],
+                methods: {
+                    putToClipboard(newClipboardContent) {
+                        require("electron").ipcRenderer.send("put-to-clipboard", newClipboardContent);
+                    },
+                    contractBytecode(contract){
+                        if (contract && 
+                            contract.evm &&
+                            contract.evm.bytecode && 
+                            contract.evm.bytecode.object) {
+                            return contract.evm.bytecode.object;
+                        } else {
+                            return "";
+                        }
+                    },
+                    contractAbi(contract){            
+                        if (contract && contract.abi) {
+                            return JSON.stringify(contract.abi);
+                        } else {
+                            return "";
+                        }
+                    }
+                }
+            };
+            Vue.filter("contractBytecode", function(contract){
+                if (contract && 
+                    contract.evm &&
+                    contract.evm.bytecode && 
+                    contract.evm.bytecode.object) {
+                    return contract.evm.bytecode.object;
+                } else {
+                    return "";
+                }
+            });
+            Vue.filter("contractAbi", function(contract){            
+                if (contract && contract.abi) {
+                    return JSON.stringify(contract.abi);
+                } else {
+                    return "";
+                }
+            });            
+            Vue.filter("errorHeader", function(errorObj){
+                var msg = errorObj.formattedMessage;
+                return msg ? msg.split(":").slice(1, 4).join(":") : "";
+            });     
+            Vue.filter("errorBody", function(msg, line){
+                if (line === 0) {
+                    return  msg.replace(msg.split(":").slice(0, 4).join(":") + ":", "");
+                } else {
+                    return msg;
+                }
+            });                 
             new Vue({
                 el:"#app", 
+                components: {"compilation-results": compilationResultsComponent,
+                            "error-boxes": errorBoxesComponent},
                 watch: {
                     solidityCode: function(oldcode, newCode){
-                        this.currentCompilerVersion = this.compilerRequired();
                         this.compile();
-                    },
-                    currentCompilerVersion: function(newVersion, oldVersion) {
-                        var _this = this;
-                        this.compilerLoading = true;
-                        if (window.Module) {
-                            delete window.Module;
-                        }
-                        // alert(newVersion);
-                        // alert(oldVersion);
-                        var load = src => (function(d, script) {
-                            script = d.createElement('script');
-                            script.type = 'text/javascript';
-                            script.src = src;
-                            script.onload = () => {
-                                _this.compilerLoading = false;
-                                // this.solc = wrapper(window.Module);
-                                _this.compile();
-                                alert("fffff");
-                            }
-                            d.getElementsByTagName('head')[0].appendChild(script);
-                            alert(src);
-                        }(document));
-                        load(`https://ethereum.github.io/solc-bin/bin/${this.compilerVersions[newVersion]}`);
                     }
                 },
                 mounted() {
-                    this.compilerVersions = soljsonReleases;
-                    this.currentCompilerVersion = this.compilerRequired();
-                },
-                filters: {
-                    errorHeader: function(errorObj){
-                        var msg = errorObj.formattedMessage;
-                        return msg ? msg.split(":").slice(1, 4).join(":") : "";
-                    },
-                    errorBody: function(msg, line){
-                        if (line === 0) {
-                            return  msg.replace(msg.split(":").slice(0, 4).join(":") + ":", "");
-                        } else {
-                            return msg;
-                        }
-                    }
+                    this.solc = wrapper(window.Module);
+                    this.compile();
                 },
                 data: {
-                    compilerLoading: false,
-                    currentCompilerVersion: undefined,
-                    compilerVersions: undefined,
-                    constantCompilation: true,
+                    solc: undefined,
                     sheet: false,
-                    drawer: false,
                     compilationResult: undefined,
-                    solidityCode: `pragma solidity ^0.4.18;
+                    solidityCode: `pragma sollidity ^0.5.6;
                         contract HelloWorld {
-                        function displayMessage() constant returns (string) {
-                            return "Whale hello there!";
+                        function displayMessage() public view returns (string memory s) {
+                            return "Whale hello thdere!";                            
+                        }
+                    }
+                    contract NotHelloWorld {
+                        function displayMessage() public view returns (string memory s) {
+                            return "hello there!";                            
                         }
                     }`
                 },
                 computed: {
+                    compilerVersion() {
+                        if(this.solc) {
+                            return this.solc.version();
+                        } else {
+                            return "";
+                        }
+                    },
                     compilationHasNoErrors () {
                         if (!this.compilationResult) { return false; }
-                        if (!this.compilationResult.errors) { return false; }
-                        if (!Array.isArray(this.compilationResult.errors)) { return false; }
-                        if (this.compilationResult.errors.filter(err => err.severity === "error").length) { return false; }
+                        if (this.compilationResult.errors && 
+                            Array.isArray(this.compilationResult.errors) &&
+                            this.compilationResult.errors.filter(err => err.severity === "error").length) { return false; }
                         return true;
                     },
                     compilationErrors () {
                         if (this.compilationResult) {
                             return this.compilationResult.errors;
                         }
-                    },                                         
-                    isCompilerVersionNeededDetected() {
-                        if (this.solidityCode.startsWith("pragma")) {
-                            var pragmaDirective = this.solidityCode.split(";")[0];
-                            if (/[0-9\.]+/.exec(pragmaDirective)) {
-                                if (this.compilerVersions[compilerRequired]) {
-                                    return true;
-                                }
-                            }
-                        }
-                        return false;
                     },
-                    isCompilerVersionNeededErrorMessage() {
-                        if (this.solidityCode.startsWith("pragma")) {
-                            var pragmaDirective = this.solidityCode.split(";")[0];
-                            if (/[0-9\.]+/.exec(pragmaDirective)) {
-                                if (this.compilerVersions[this.compilerRequired()]) {
-                                    return "";
-                                } else {
-                                    return `compiler version ${this.compilerRequired()} not found`;
-                                }
-                            } else {
-                                return "pragma directive not found";
-                            }
+                    compiledContracts() {
+                        var res = this.compilationResult;
+                        if (res && res.contracts && res.contracts[""]) {
+                            var contracts = this.compilationResult.contracts[""];
+                            return Object.keys(contracts).map(name => Object.assign({name}, contracts[name]));
+                        } else {
+                            return [];
                         }
-                        return "pragma directive not found";
-                    },                    
+                    },                                      
                     compiledContractBytecode() {
                         var res = this.compilationResult;
                         if (res && res.contracts && res.contracts[""]) {
@@ -226,39 +225,20 @@
                             var firstContractName = Object.keys(contracts)[0];
                             var compiledContract = contracts[firstContractName];
                             var {abi} = compiledContract;
-                            return abi;
+                            return JSON.stringify(abi);
                         } else {
                             return "";
                         }
                     }
                 },
-                methods: {                   
-                    compilerRequired() {
-                        var result = "";
-                        if (this.solidityCode.startsWith("pragma")) {
-                            var pragmaDirective = this.solidityCode.split(";")[0];
-                            var matches = /[0-9\.]+/.exec(pragmaDirective);
-                            if (matches) {
-                                result = matches[0];
-                            }
-                        }
-                        return result;
-                    },
-                    escapeHelper (str) {
-                        return escape(str);
-                    },
-                    compile() {
-                        // wrapper = require("./wrapper");
-                        wrapper = require('solc/wrapper')
-                        solc = wrapper(window.Module)
-                        //solc = wrapper(window.Module);
-                        //solc = solc;
+                methods: {
+                    compile() {                        
                         const input = {
                             language: 'Solidity',
                             sources: { ['']: { content: this.solidityCode } },
                             settings: { outputSelection: { '*': { '*': ['*'] } } }
                         }
-                        this.compilationResult = JSON.parse(solc.compile(JSON.stringify(input)));
+                        this.compilationResult = JSON.parse(this.solc.compile(JSON.stringify(input)));
                     }
                 }
             });

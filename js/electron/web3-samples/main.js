@@ -1,4 +1,4 @@
-const {app, BrowserWindow, Menu, globalShortcut} = require("electron");
+const {dialog, app, BrowserWindow, Menu, globalShortcut, ipcMain, clipboard} = require("electron");
 var path = require("path");
 
 let mainWindow;
@@ -11,15 +11,17 @@ app.on("ready", () => {
         minHeight: 300,
         show: false,
         icon: path.join(__dirname, "assets", "img", "solidity.jpeg"),
-        webPreferences: {
-            nodeIntegration: false
-        }
+        // webPreferences: { nodeIntegration: false }
     });
     mainWindow.loadURL("file://" + path.join(__dirname, 'just-compile.html'));
 
     globalShortcut.register('F5', () => {
         mainWindow.webContents.reload();
     });    
+
+    ipcMain.on("put-to-clipboard", (event, arg) => {
+        clipboard.writeText(arg);
+    });
 
     mainWindow.once('ready-to-show', () => {
         Menu.setApplicationMenu(Menu.buildFromTemplate([
