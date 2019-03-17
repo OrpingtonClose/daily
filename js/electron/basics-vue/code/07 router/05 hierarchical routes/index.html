@@ -4,8 +4,9 @@
     <body>
         <div id="app">
             <h1>Kindgdom Encyclopedia</h1>
-            <router-link to="/user/Stark/">Stark</router-link>
-            <router-link to="/user/Lannister/">Lannister</router-link>
+            <h4>{{getTitle()}}</h4>
+            <router-link to="/users/Stark/">Stark</router-link>
+            <router-link to="/users/Lannister/">Lannister</router-link>
             <router-view></router-view>
         </div>
         <script src="../../../assets/js/vue.js"></script>
@@ -17,8 +18,10 @@
                     <div class="user">
                         <h1>Kingdoms Encyclopedia</h1>
                         User {{$route.params.id}}
-                        <router-link to="gold">Gold</router-link>
-                        <router-link to="soldiers">Soldiers</router-link>
+                        <ul>
+                            <li><router-link to="gold">Gold</router-link></li>
+                            <li><router-link to="soldiers">Soldiers</router-link></li>
+                        </ul>
                         <router-view></router-view>
                     </div>
                 `
@@ -27,7 +30,7 @@
                 template: `
                     <div class="soldiers">
                         <span v-for="soldier in $root[$route.params.id].soldiers">
-                            <img href="../../../assets/img/sword.png"/>
+                            <img src="../../../assets/img/sword.png"/>
                         </span>
                     </div>
                 `    
@@ -36,7 +39,7 @@
                 template: `
                     <div class="gold">
                         <span v-for="soldier in $root[$route.params.id].gold">
-                            <img href="../../../assets/img/sack-of-gold.png"/>
+                            <img src="../../../assets/img/sack-of-gold.png"/>
                         </span>
                     </div>
                 `
@@ -54,6 +57,11 @@
             new Vue({
                 router,
                 el:"#app",
+                methods:{
+                    getTitle() {
+                        return document.URL;
+                    }
+                },
                 data: {
                     Stark: {
                         soldiers: 100,
