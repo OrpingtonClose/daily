@@ -1,0 +1,126 @@
+<html>
+    <head>
+        <link href="../../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css" rel="stylesheet"/>
+        <link href="../../../assets/css/vuetify.css" rel="stylesheet"/>
+    </head>
+    <body>
+        <div id="app">
+            <v-app id="inspire">
+                <v-navigation-drawer fixed app permanent hide-overlay width="180px">
+                    <v-list dense>
+                        <sidelink><router-link to="/">Home</router-link></sidelink>                                
+                        <sidelink><router-link to="/clothes" exact>Clothes</router-link></sidelink>
+                        <sidelink><router-link to="/shoes" exact>Shoes?</router-link></sidelink>
+                        <sidelink><router-link :to="{name: 'listing-size', params: {size: 44}}">Shoes of size 44?</router-link></sidelink>
+                        <sidelink><router-link to="/shoes-random" exact>any Shoes?</router-link></sidelink>
+                        <sidelink><router-link to="/something-something">Dead link</router-link></sidelink>                     
+                    </v-list>
+                </v-navigation-drawer>
+                <v-toolbar color="indigo" dark fixed app>
+                    <v-toolbar-title>Application</v-toolbar-title>
+                    <span slot="extension">{{url()}}</span>
+                </v-toolbar>
+                <v-content>
+                    <v-container fluid fill-height>
+                    <v-layout justify-center align-center>
+                        <v-flex text-xs-center>
+                            <router-view></router-view>
+                        </v-flex>
+                    </v-layout>
+                    </v-container>
+                </v-content>
+            </v-app>
+        </div>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vue-router.js"></script>
+        <script src="../../../assets/js/vuetify.js"></script>
+        <script>
+            Vue.component("sidelink", {
+                template: `
+                <v-list-tile @click="">                                
+                    <v-list-tile-content>
+                        <v-list-tile-title>
+                            <slot/>
+                        </v-list-tile-title>
+                    </v-list-tile-content>
+                </v-list-tile>
+                `
+            })
+            Vue.component("message-place", {
+                template: `
+                <v-layout>
+                    <v-flex xs12>
+                        <v-layout align-center justify-center row fill-height>
+                            <slot/>
+                        </v-layout>
+                    </v-flex>
+                </v-layout>
+                `
+            });
+            Vue.component("bad-message", {
+                template: `
+                <message-place>
+                    <v-alert class="text-xs-center text-md-center" color="red" transition="scale-transition" :value="true" type="error">
+                        <slot/>
+                    </v-alert>
+                </message-place>
+                `
+            });
+            Vue.component("good-message", {
+                template: `
+                <message-place>
+                    <v-alert class="text-xs-center text-md-center" color="#2196f3" transition="scale-transition" :value="true">
+                        <slot/>
+                    </v-alert>
+                </message-place> 
+                `
+            });        
+            const HomeComponent = {template:"<good-message>Welcome to Clothes for Humans</good-message>"};
+            const ClothesComponent = {template:"<good-message>Today we have shoes{{ $route.params.size ? ' of size ' + $route.params.size : ''}}</good-message>"};
+            const SalesComponent = {template:"<good-message>Up to 50% discounts! Buy!</good-message>"};
+            const NotFoundComponent = {
+                template: `<bad-message>404: Page not found</bad-message>`
+            };
+            let vm;
+            Vue.use(VueRouter);
+            const router = new VueRouter({
+                routes: [
+                    {path: "/", component: HomeComponent, redirect: "/last-year-sales"},
+                    {path: "/clothes", name: "listing", component: ClothesComponent},
+                    {path: "/clothes/:size", name: "listing-size", component: ClothesComponent},
+                    {path: "/shoes", redirect: {name: "listing"}},
+                    {path: "/shoes/:size", redirect: "/clothes:size"},
+                    {path: "/last-year-sales", component: SalesComponent},
+                    {path: "/404", component: NotFoundComponent},
+                    // {path: "/shoes-random", redirect: {name: "listing"}},
+                    {path: "/shoes-random", redirect: to =>{
+                        //makes the UI unresponsive somehow
+                        // if (vm) {
+                        //     vm.hash = to.hash;
+                        //     vm.params = to.params;
+                        //     vm.query = to.query;
+                        // }
+                        var newShoeSize = Math.floor(Math.random() * 20) + 60;
+                        //to.params.size = newShoeSize;
+                        // return { name: "listing-size", params: {size: newShoeSize} };
+                        return { path: "/clothes/:size", params: {size: newShoeSize} };
+                        //return { name: "listing-size"};
+                    }},
+                    {path: "*", redirect:"/404"}
+                ]
+            });
+            vm = new Vue({
+                router,
+                data: {
+                    hash: undefined,
+                    params: undefined,
+                    query: undefined
+                },
+                el:"#app",
+                methods: {
+                    url: () => "#" + document.URL.split("#").pop()
+                }
+            });
+        </script>    
+    </body>
+</html>

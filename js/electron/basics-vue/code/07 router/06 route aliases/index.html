@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <style>
+            .emoji {
+                font-size: 3em;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <h3>{{getUrl()}}</h3>
+            <router-link to="/red-dress-01/">Valentino</router-link>
+            <router-link to="/red-purse-A2/">Prada</router-link>
+            <router-link to="/green-dress-01/">Valentino</router-link>
+            <router-link to="/green-purse-A2/">Prada</router-link>            
+            <router-view></router-view>
+        </div>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vue-router.js"></script>
+        <script>
+            const Valentino01 = {template: "<div class='emoji'><img src='../../../assets/img/valentino.png'/></div>"};
+            const PradaA2 = {template: "<div class='emoji'><img src='../../../assets/img/purse.png'/></div>"};
+            const router = new VueRouter({
+                routes: [
+                    {path: "/red-dress-01", alias: "/green-dress-01", component: Valentino01},
+                    {path: "/green-purse-A2", alias: "/red-purse-A2", component: PradaA2}
+                ]
+            });
+            Vue.use(VueRouter);
+            new Vue({
+                router,
+                el: "#app",
+                methods: {
+                    getUrl() {
+                        return "#" + document.URL.split("#").pop();
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

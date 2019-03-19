@@ -1,0 +1,87 @@
+<html>
+    <head>
+        <link href="../../../assets/css/nprogress.css" rel="stylesheet"/>
+        <style>
+            div.toast {
+                width: 15em;
+                height: 1em;
+                position: fixed;
+                bottom: 1em;
+                background-color: red;
+                color: white;
+                padding: 1em;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <h1>My Portfolio</h1>
+            <ul>
+                <li><router-link to="/" exact>Home</router-link></li>
+                <li><router-link to="/aboutme">About me - might break, be cautious</router-link></li>
+            </ul>
+            <router-view></router-view>
+            <div class="toast" v-show="showError">
+                There was an error
+            </div>
+        </div>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vue-router.js"></script>
+        <script src="../../../assets/js/axios.js"></script>
+        <script src="../../../assets/js/nprogress.js"></script>
+        <script>
+            let vm;
+            const AboutMeComponent = {
+                template: "<div>name:{{name}}<br/>phone:{{phone}}</div>",
+                data() {
+                    return {
+                        name: undefined,
+                        phone: undefined
+                    }
+                },
+                beforeRouteEnter(to, from, next) {
+                    var url = Math.random() > 0.5 ? "https://schematic-ipsum.herokuapp.com/" : "httpf://example.com/";
+                    axios.post(url, {
+                        "type": "object",
+                        "properties": {
+                            "name": { "type": "string", "ipsum": "name" },
+                            "phone": { "type": "string", "format": "phone"}
+                        }
+                    }).then(response => {
+                        vm.showError = false;
+                        next(vm => {
+                            vm.name = response.data.name;
+                            vm.phone = response.data.phone;
+                        })
+                    }).catch(error => {
+                        NProgress.done();
+                        vm.showError = true;
+                        next(false);
+                    });
+                }
+            }
+            Vue.use(VueRouter);            
+            var router = new VueRouter({
+                routes: [
+                    {path: "/", component: {template: "<div>This is my home page</div>"}},
+                    {path: "/aboutme", component: AboutMeComponent}
+                ]
+            });
+            router.beforeEach((to, from, next) => {
+                NProgress.start();
+                next();
+            });
+            router.afterEach((to, from) => {
+                NProgress.done();
+            });            
+            vm = new Vue({
+                el:"#app",
+                router,
+                data: {
+                    showError: false
+                }
+            })
+        </script>
+    </body>
+</html>

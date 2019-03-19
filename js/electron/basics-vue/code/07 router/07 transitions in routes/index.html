@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <style>
+            .spooky-enter-active,
+            .spooky-leave-active {
+                transition: opacity .5s;
+            }
+            .spooky-enter,
+            .spooky-leave-active {
+                opacity: 0;
+            }
+            .delicious-enter-active,
+            .delicious-leave-active {
+                transition: opacity 2s;
+                transition: font-size .5s;
+            }
+            .delicious-enter,
+            .delicious-leave-active {
+                opacity: 0;
+                font-size: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <h1>Ghost's restaurant</h1>
+            <ul>
+                <li><router-link to="/">Home</router-link></li>
+                <li><router-link to="/menu">Menu</router-link></li>
+            </ul>
+            <!-- <transition mode="out-in"> -->
+            <router-view></router-view>
+            <!-- </transition> -->
+        </div>
+        <script src="../../../assets/js/vue.js"></script>
+        <script src="../../../assets/js/vue-router.js"></script>
+        <script>
+            Vue.use(VueRouter);
+            new Vue({
+                router: new VueRouter({
+                    routes: [
+                        {path: "/", component: {template: "<transition name='spooky' mode='out-in'><div>Welcome to ghosts restaurant</div></transition>"}},
+                        {path: "/menu", component: {template: "<transition name='delicious' mode='out-in'><div>today's menu: Invisible cookie</div></transition>"}}
+                    ]
+                }),
+                el: "#app"
+            });
+        </script>
+    </body>
+</html>

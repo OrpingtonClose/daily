@@ -13,7 +13,7 @@ app.on("ready", () => {
         icon: path.join(__dirname, "assets", "img", "solidity.jpeg"),
         // webPreferences: { nodeIntegration: false }
     });
-    mainWindow.loadURL("file://" + path.join(__dirname, 'just-compile.html'));
+    mainWindow.loadURL("file://" + path.join(__dirname, 'index.html'));
 
     globalShortcut.register('F5', () => {
         mainWindow.webContents.reload();
