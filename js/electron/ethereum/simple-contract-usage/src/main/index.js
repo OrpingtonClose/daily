@@ -1,9 +1,14 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 
-/**
- * Set `__static` path to static files in production
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
- */
+const Web3 = require("web3")
+const ganache = require("ganache-core");
+const web3 = new Web3();
+web3.setProvider(ganache.provider());
+
+ipcMain.on("web3", (event, arg) => {
+    event.source.send("web3", web3);
+});
+
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
@@ -31,12 +36,6 @@ function createWindow () {
 }
 
 app.on('ready', createWindow)
-
-ipcMain.on("compile-this", (event, arg) => {
-    var solc = require("solc");
-    var compiled = solc.compile(arg);
-    event.sender.send("compiled-this", compiled);
-});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

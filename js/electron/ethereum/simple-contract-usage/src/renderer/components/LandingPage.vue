@@ -13,11 +13,11 @@
         <div class="doc">
           <div class="title">Getting Started</div>
           <p>
-            {{compiled ? JSON.stringify(compiled, null, 2) : `electron-vue comes packed with detailed documentation that covers everything from
+            electron-vue comes packed with detailed documentation that covers everything from
             internal configurations, using the project structure, building your application,
-            and so much more`}}
+            and so much more.
           </p>
-          <button @click="compile('contract C { function f() public { } }')">compile code</button><br><br>
+          <button @click="open('https://simulatedgreg.gitbooks.io/electron-vue/content/')">Read the Docs</button><br><br>
         </div>
         <div class="doc">
           <div class="title alt">Other Documentation</div>
@@ -35,20 +35,9 @@
   export default {
     name: 'landing-page',
     components: { SystemInformation },
-    data() {
-        return {
-            compiled: undefined
-        }
-    },
     methods: {
       open (link) {
         this.$electron.shell.openExternal(link)
-      },
-      compile(code) {
-            require("electron").ipcRenderer.once("compiled-this", (event, arg) =>{
-                this.compiled = arg;    
-            });          
-            require("electron").ipcRenderer.send("compile-this", code);
       }
     }
   }

@@ -23,26 +23,34 @@
         <div class="value">{{ node }}</div>
       </div>
       <div class="item">
-        <div class="name">Platform:</div>
-        <div class="value">{{ platform }}</div>
+        <div class="name">Web3:</div>
+        <div class="value">{{ web3Props }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  export default {
-    data () {
-      return {
-        electron: process.versions.electron,
-        name: this.$route.name,
-        node: process.versions.node,
-        path: this.$route.path,
-        platform: require('os').platform(),
-        vue: require('vue/package.json').version
-      }
+    var electron = require("electron");
+    export default {
+        data () {
+            return {
+                web3Props: undefined,
+                electron: process.versions.electron,
+                name: this.$route.name,
+                node: process.versions.node,
+                path: this.$route.path,
+                platform: require('os').platform(),
+                vue: require('vue/package.json').version
+            }
+        },
+        mounted() {
+            electron.ipcRenderer.on("web3", (event, arg) => {
+                this.web3Props = JSON.stringify(Object.keys(arg), null, 2);
+            });
+            electron.ipcRenderer.send("web3", "");
+        }
     }
-  }
 </script>
 
 <style scoped>

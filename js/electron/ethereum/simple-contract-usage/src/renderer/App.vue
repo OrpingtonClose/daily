@@ -6,7 +6,7 @@
 
 <script>
   export default {
-    name: 'contract-deployer'
+    name: 'simple-contract-usage'
   }
 </script>
 
