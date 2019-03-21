@@ -22,9 +22,13 @@
         <div class="name">Node:</div>
         <div class="value">{{ node }}</div>
       </div>
-      <div class="item">
-        <div class="name">Web3:</div>
+      <!-- <div class="item">
+        <div class="name">Web3</div>
         <div class="value">{{ web3Props }}</div>
+      </div> -->
+      <div class="item" v-for="(account, i) in web3Props" :key="account">
+        <!-- <div class="name">Account {{ i }}</div> -->
+        <div class="value">{{ account }}</div>
       </div>
     </div>
   </div>
@@ -45,10 +49,10 @@
             }
         },
         mounted() {
-            electron.ipcRenderer.on("web3", (event, arg) => {
-                this.web3Props = JSON.stringify(Object.keys(arg), null, 2);
-            });
-            electron.ipcRenderer.send("web3", "");
+            //electron.ipcRenderer.send("web3", "");
+            this.web3Props = electron.ipcRenderer.sendSync("web3", "accounts")
+            //console.log();
+            //console.log(electron.ipcRenderer);
         }
     }
 </script>
