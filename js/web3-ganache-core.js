@@ -2,6 +2,7 @@
 const Web3 = require("web3");
 const ganache = require("ganache-core");
 const _ = require("lodash");
+const {log, error} = console;
 var expect = require('chai').expect;
 var should = require('chai').should();
 var privateKeys = [   
@@ -19,12 +20,12 @@ var privateKeys = [
 
 var options = {
     accounts: privateKeys.map(secretKey  => ({
-        balance: "0x"+ parseInt(web3.utils.toWei("1000", "ether")).toString(16), 
+        balance: "0x"+ (100000000000000000000).toString(16), 
         secretKey 
     }))
 }
-var a = (100).should.equal(10)
-var web3 = new Web3(ganache.provider(options));
+var provider = ganache.provider(options);
+var web3 = new Web3(provider);
 
 web3.eth.personal.getAccounts().then( accounts => {
     return Promise.all(accounts.map(account => {
@@ -37,17 +38,19 @@ web3.eth.personal.getAccounts().then( accounts => {
     })
 }).then(ethBalances => {
     ethBalances.forEach(ethBalance => {
-        ethBalance.should.equal("1000")
+        ethBalance.should.equal("100")
     });
     console.log(ethBalances)
 }).catch(console.error);
 
 //web3.eth.accounts.privateKeyToAccount("0x21d2bf4a063cb1709bb5439cfbbf808afe2a02ba4883eba2586642d4961bde3a");
-
-var sending = web3.eth.accounts.privateKeyToAccount(privateKeys[0]);
-var receiving = web3.eth.accounts.privateKeyToAccount(privateKeys[1]);
+//Error: sender doesn't have enough funds to send tx. The upfront cost is: 1000000000800000 and the sender's account only has: 0
+//https://github.com/trufflesuite/ganache-core/releases/tag/v2.5.4-beta.2
+//https://github.com/trufflesuite/ganache-core
 
 (async function() {
+    var sending = web3.eth.accounts.privateKeyToAccount(privateKeys[0]);
+    var receiving = web3.eth.accounts.privateKeyToAccount(privateKeys[1]);
     var tx = {
         nonce: await web3.eth.getTransactionCount(sending.address),
         chainId: await web3.eth.net.getId(),
@@ -58,19 +61,20 @@ var receiving = web3.eth.accounts.privateKeyToAccount(privateKeys[1]);
     };
     var signedTx = await web3.eth.accounts.signTransaction(tx, sending.privateKey);
     web3.eth.sendSignedTransaction(signedTx.rawTransaction).on("receipt", console.log);
-    await web3.currentProvider.sendPayload({
-        jsonrpc: "2.0",
-        method: "evm_mine",
-        id: new Date().getTime()
-    });
-    //   console.log("block" + (await web3.eth.getBlock("latest")).number);
-})()
+})().then(log).catch(error)
 
-web3.currentProvider.send({
+//https://medium.com/coinmonks/testing-time-dependent-logic-in-ethereum-smart-contracts-1b24845c7f72
+provider.send({
     jsonrpc: "2.0",
     method: "evm_mine",
     id: 123
-});
+}, log);
+
+(async function() {
+    console.log("block " + (await web3.eth.getBlock("latest")).number);
+})()
+
+
 
 web3.currentProvider.send({
     jsonrpc: "2.0",
@@ -99,4 +103,19 @@ timeTravel(0)
 //    assert.deepStrictEqual(result.result, "0x0");
 })()
 
-web3.eth.getBlock("latest").then(console.log)
+web3.eth.getBlock("latest").then(n=>console.log(n.number))
+
+const mineOneBlock = async () => {
+    await web3.currentProvider.send({
+      jsonrpc: '2.0',
+      method: 'evm_mine',
+      params: [],
+      id: 0,
+    })
+  }
+  
+  (async n => {
+    for (let i = 0; i < 10; i++) {
+      await mineOneBlock()
+    }
+  })()
