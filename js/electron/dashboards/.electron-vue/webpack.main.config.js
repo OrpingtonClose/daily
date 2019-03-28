@@ -26,6 +26,10 @@ let mainConfig = {
         test: /\.node$/,
         use: 'node-loader'
       }
+      // ,{
+      //   test: /\.vue$/,
+      //   use: 'vuetify-loader'
+      // }
     ]
   },
   node: {
@@ -68,5 +72,11 @@ if (process.env.NODE_ENV === 'production') {
     })
   )
 }
+
+// const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
+
+// mainConfig.plugins.push(
+//   new VuetifyLoaderPlugin()
+// )
 
 module.exports = mainConfig

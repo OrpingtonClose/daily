@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='../../assets/css/Roboto:100,300,400,500,700,900|Material+Icons.css' rel="stylesheet">
+    <script src="https://unpkg.com/rxjs/bundles/rxjs.umd.js"></script>
+    <script src="../../assets/js/vue.js"></script>
+    <script src="../../assets/js/vue-rx.js"></script>
+    <script src="../../assets/js/vuetify.js"></script>
+    <link href="../../assets/css/vuetify.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <v-btn v-stream:click="plus$">Add</v-btn>
+        <v-btn v-stream:click="minus$">REMOVE</v-btn>
+        <v-chip>
+            <v-avatar class="teal">{{count}}</v-avatar>
+                Counts so far
+        </v-chip>
+        <v-text-field label="Search wikipedia" v-model="search"></v-text-field>
+        <pre>{{JSON.stringify(results, null, 2)}}</pre>
+    </div>
+    <script>
+        // const { merge } = rxjs;
+        // const { map, startWith, scan } = rxjs.operators;
+
+        new Vue({ 
+            el: '#app', 
+            data: {
+                search: 'aaaaaaaaaaaaaaaaaaaa'
+            },
+            domStreams: ['plus$', 'minus$'],
+            subscriptions () {
+                return {
+                    results: this.$watchAsObservable("search").pipe(
+                        rxjs.operators.pluck("newValue"),
+                        rxjs.operators.filter(text => text.length > 2),
+                        rxjs.operators.debounceTime(500),
+                        rxjs.operators.distinctUntilChanged(),
+                        rxjs.operators.switchMap(term => rxjs.ajax.ajax.getJSON(`https://en.wikipedia.org/w/api.php?action=opensearch&format=json&origin=*&search=${term}`))
+                        //rxjs.operators.switchMap(term => rxjs.ajax.ajax.getJson(`https://en.wikipedia.org/w/api.php?action=opensearch&format=json&origin=*&search=${term}`))
+                    ),
+                    count: rxjs.merge( 
+                        this.plus$.pipe(rxjs.operators.map(()=>1)), 
+                        this.minus$.pipe(rxjs.operators.map(()=>-1))
+                    ).pipe(
+                        rxjs.operators.startWith(0),
+                        rxjs.operators.scan((total, change) => total + change)
+                    )
+                }
+            }
+        })
+    </script>
+</body>
+</html>

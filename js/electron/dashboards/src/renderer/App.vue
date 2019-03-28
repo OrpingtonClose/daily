@@ -1,119 +1,58 @@
 
 <template>
     <div>
-        <v-toolbar>
-            <v-toolbar-side-icon></v-toolbar-side-icon>
+        <v-toolbar >
+            <v-btn icon @click.stop="drawer = !drawer">
+            <v-icon>menu</v-icon>
+            </v-btn>
+            <!-- <v-btn flat @click="$router.push({path:'/'})">One</v-btn> -->
+            <!-- <v-toolbar-side-icon></v-toolbar-side-icon> -->
                 <v-toolbar-title>Title</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-toolbar-items>
-                <v-btn flat>Link One</v-btn>
-                <v-btn flat>Link Two</v-btn>
-                <v-btn flat>Link Three</v-btn>
+                <!-- <router-link to="/"><v-btn flat>one</v-btn></router-link>
+                <v-btn flat><router-link to="/herp">Two</router-link></v-btn>  
+                <v-btn flat><router-link to="/new">Three</router-link></v-btn>                       -->
+                <v-btn flat @click="$router.push({path:'/'})">One</v-btn>
+                <v-btn flat @click="$router.push({path:'/herp'})">Two</v-btn>  
+                <v-btn flat @click="$router.push({path:'/new'})">Three</v-btn>  
             </v-toolbar-items>
-        </v-toolbar>          
+        </v-toolbar>
         <ul>
             <li>,mmmmmmmmmmmmmmmmmmmm</li>
             <li>oooo</li>
             <li>cccc</li>
         </ul>
-        <v-btn @click="alert()">Hello</v-btn>
+        <v-btn @click="alert(Object.keys($router))">Hello</v-btn>
+        <br/>
+        <!-- <ul>
+            <li><router-link to="/">one</router-link></li>
+            <li><router-link to="/herp">Two</router-link></li>
+            <li><router-link to="/new">Three</router-link></li>
+        </ul> -->
+        <router-view></router-view>
     </div>
 </template>
-<!-- <template>
-    <div id="app">
-        <v-toolbar height="400px" app fixed>
-            <v-toolbar-title>Title</v-toolbar-title>
-            <v-toolbar-items class="hidden-sm-and-down">
-                <v-btn flat to="/">Hello</v-btn>
-                <v-btn flat to="/herp">Hello</v-btn>  
-                <v-btn flat to="/new">Hello</v-btn>  
-            </v-toolbar-items>
-        </v-toolbar>
-            <!-- <v-btn to="/">Hello</v-btn>
-            <v-btn to="/herp">Hello</v-btn>  
-            <v-btn to="/new">Hello</v-btn>  
-            <!-- <router-view></router-view> 
-    </div>
-</template>
--->
-<!--
-<template>
-    <v-app id="inspire">
-        <v-navigation-drawer v-model="drawer" fixed app>
-            <v-list dense>
-                <v-list-tile @click="">
-                <v-list-tile-action>
-                    <v-icon>home</v-icon>
-                </v-list-tile-action>
-                <v-list-tile-content>
-                    <v-list-tile-title>Home</v-list-tile-title>
-                </v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile @click="">
-                <v-list-tile-action>
-                    <v-icon>contact_mail</v-icon>
-                </v-list-tile-action>
-                <v-list-tile-content>
-                    <v-list-tile-title>Contact</v-list-tile-title>
-                </v-list-tile-content>
-                </v-list-tile>
-            </v-list>
-        </v-navigation-drawer>
-        
-        <v-toolbar color="indigo" dark fixed app id="herpmerp">
-            <div id="herpmerp">ddddddddddddddddddd</div>
-        <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-        <v-toolbar-title>Application</v-toolbar-title>
-        </v-toolbar>
-        
-        <v-content>
-        <v-container fluid fill-height>
-            <v-layout
-            justify-center
-            align-center
-            >
-            <v-flex text-xs-center>
-                <v-tooltip left>
-                <template v-slot:activator="{ on }">
-                    <v-btn @click="drawer = !drawer">aaaaaaaaaaaaaaaaaaaa</v-btn>
-                    <v-btn :href="source" icon large target="_blank" v-on="on">
-                    <v-icon large>code</v-icon>
-                    </v-btn>
-                </template>
-                <span>Source</span>
-                </v-tooltip>
-                <v-tooltip right>
-                <template v-slot:activator="{ on }">
-                    <v-btn icon large href="https://codepen.io/johnjleider/pen/rJdVMq" target="_blank" v-on="on">
-                    <v-icon large>mdi-codepen</v-icon>
-                    </v-btn>
-                </template>
-                <span>Codepen</span>
-                </v-tooltip>
-            </v-flex>
-            </v-layout>
-        </v-container>
-        </v-content>
-        <v-footer color="indigo">
-        <span class="white--text">&copy; 2017</span>
-        </v-footer>
-    </v-app>
-</template>
--->
 
 <script>
-    // import Vue from "vue";
-    // import Vuetify from "vuetify";
-    // Vue.use(Vuetify);
+// import Vue from 'vue'
+//     import Vuetify from 'vuetify';
+//     import 'vuetify/dist/vuetify.min.css';
+//     import VueRouter from 'vue-router';
+//     Vue.use(Vuetify);
+//     Vue.use(VueRouter);
     export default {
         //name: 'dashboards',
         data: () => ({
             drawer: true
         }),    
         methods: {
-            alert() {
-                alert("herpmerp");
+            alert(m) {
+                alert(m);
             }
         }
     }
 </script>
+<style>
+   @import url(https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons);
+</style>

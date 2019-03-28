@@ -52,11 +52,16 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "blockies": "0.0.2",
     "ganache-core": "^2.5.3",
+    "rxjs": "^6.4.0",
+    "solc": "^0.5.6",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",
-    "web3": "^1.0.0-beta.50"
+    "vue-rx": "^6.1.0",
+    "vuetify": "0.14.11",
+    "web3": "^1.0.0-beta.34"
   },
   "devDependencies": {
     "ajv": "^6.5.0",
@@ -84,6 +89,8 @@
     "mini-css-extract-plugin": "0.4.0",
     "multispinner": "^0.2.1",
     "node-loader": "^0.6.0",
+    "pug": "^2.0.3",
+    "pug-plain-loader": "^1.0.0",
     "style-loader": "^0.21.0",
     "url-loader": "^1.0.1",
     "vue-html-loader": "^1.2.4",

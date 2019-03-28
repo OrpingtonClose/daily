@@ -1,32 +1,51 @@
-<template lang="pug">
-v-app(:dark="dark",standalone)
-    v-navigation-drawer(v-model='drawer',:mini-variant.sync="mini", permanent, persistent,:dark="dark")
-        .pa-3.text-xs-center(v-show="true")
-            div.display-2.py-4 Adminify
-            p {{'An admin dashboard based on Vuetify'}}
-            div(style="padding-left:5em")
-                v-switch(:label="(!dark ? 'Light' : 'Dark') + ' Theme'", v-model="dark", :dark="dark", hide-details)
-            div
-                v-btn(dark, tag="a", href="https://github.com/wxs77577/adminify", primary) 
-                    v-icon(left, dark) star
-                    span Github 
-        .pa-3.text-xs-center(v-show="mini")
-            .display-2 A
-    v-toolbar.darken-1(fixed,dark,:class="theme") 
-        v-toolbar-side-icon(dark, @click.native.stop='drawer = !drawer')
-        v-toolbar-title this is a title
-    main
-        v-container.pa-4(fluid,align-content-center)
-            .text-center
-                v-card
-                    v-card-text Molestiae ut quibusdam sit corrupti rem. In eos quis rem beatae temporibus itaque laudantium repellat. Qui ut atque nostrum qui quod dolore omnis ratione. Doloribus exercitationem doloremque ullam ex ex voluptas. Ipsum voluptatum qui repellendus est beatae rerum. Omnis reiciendis error aliquid aut quo neque totam. Et qui veniam aliquam temporibus enim corporis molestias deleniti. Est laudantium voluptatum cumque eveniet qui et ex. Id officiis culpa nam sit accusamus dignissimos. Labore velit quod sunt minima qui facilis quia minima. Repellendus repudiandae ipsum incidunt ducimus magnam voluptatem. Repudiandae porro optio aut vel est omnis beatae. Eligendi laboriosam et error voluptatem a ut quisquam similique. Iusto distinctio culpa fugiat facere et in. Commodi aspernatur officiis cum minus id aut. Voluptatem ipsum sit at nobis voluptates eum. Maxime delectus quae omnis voluptas aut. Non ab id voluptatem neque et quae ipsam ut. Omnis vel ut quas modi. Ab reprehenderit et magnam consequatur atque. Autem est aut ut. Ex eius aut sed rerum atque.
-    //- div
-    //-     div
-    //-         sidebar(v-on:new-owner="setNewOwner" :owner="currentOwner" :accounts="accounts")
-    //-     div
-    //-         identicon(identity="aaaaaaa")
-    //-         identicon(identity="aaaaaaa")
-    //-         identicon(identity="aaaaaaa")
+<template>
+<v-app>
+    <sidebar v-on:new-owner="setNewOwner" 
+             :owner="currentOwner" 
+             :accounts="accounts"></sidebar>
+    <div id="wrapper">
+        <identicon identity="aaa"></identicon>
+        <br/>
+        <identicon identity="aaaaa"></identicon>
+        <br/>
+        <identicon identity="aaaaa"></identicon>
+        <br/>        
+        
+        <!-- <main> -->
+        
+            <!-- <v-container grid-list-md>
+                <v-layout row wrap>
+                    
+                    <v-flex xs1> -->
+                        
+                        <identicon identity="aaa"></identicon>
+                        <br/>
+                        <identicon identity="aaaaa"></identicon>
+                        <br/>
+                        <identicon identity="aaaaa"></identicon>
+                        <br/>  
+                    <!-- </v-flex> -->
+
+                    <!-- <v-flex> -->
+                        <div class="left-side">
+        <identicon identity="aaa"></identicon>
+        <br/>
+        <identicon identity="aaaaa"></identicon>
+        <br/>
+        <identicon identity="aaaaa"></identicon>
+        <br/>                              
+                            <div class="item" v-for="(event, i) in whatHappened" :key="i">
+                                <div class="name">from: {{event.from.slice(0, 10)}}</div>
+                                <div class="value">to: {{event.to.slice(0, 10)}}</div>
+                            </div>
+                            <system-information></system-information>
+                        </div>
+                    <!-- </v-flex>
+                </v-layout>
+            </v-container> -->
+        <!-- </main> -->
+    </div>
+    </v-app>
 </template>
 
 <script>    
@@ -47,24 +66,16 @@ v-app(:dark="dark",standalone)
             }).then(newOwner=>{
                 _this.currentOwner = newOwner;
             });
-        },
-        randomAddress() {
-            return this.web3.accounts.create().address();
         }
     },
     data() {
-        return {
-            pageTitle: "this is a title",
-            dark: false,
-            theme: 'primary',
-            mini: false,
-            drawer: true,
-            web3: undefined,
-            accounts: [],
-            pingPong: undefined,
-            currentOwner: undefined,
-            whatHappened: []
-        }
+      return {
+        web3: undefined,
+        accounts: [],
+        pingPong: undefined,
+        currentOwner: undefined,
+        whatHappened: [],
+      }
     },
     mounted() {
         //const blockies = require("./blockies");
@@ -131,25 +142,7 @@ v-app(:dark="dark",standalone)
 
 <style>
   @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
-  /* main { */
-    /* width: 600px;  */
-    /* margin: 15px auto;  */
-    /* position: relative; */
-    /* z-index: 3000;  */
-    /* position: fixed; 
-    margin-left: 280px;        */
-      /* min-height: 50%; */
-      /* height: 100%;
-      margin-left: 30%; */
-  /* } */
-  /* main > div {
-    margin-right: 320px;
-    clear: both;
-    overflow: auto;
-    background: #1abc9c;
-    background: rgba(26,188,156, 0.4);
-    min-height: 600px;
-  }   */
+
   /* * {
     box-sizing: border-box;
     margin: 0;

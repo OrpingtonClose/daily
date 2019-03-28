@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+    <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet"> -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet"> -->
     <meta charset="utf-8">
     <title>dashboards</title>
     <% if (htmlWebpackPlugin.options.nodeModules) { %>
@@ -14,18 +14,6 @@
   </head>
   <body>
     <div id="app">
-        <!-- Set `__static` path to static files in production -->
-        <v-toolbar>
-            <v-toolbar-side-icon></v-toolbar-side-icon>
-                <v-toolbar-title>Title</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <v-toolbar-items>
-                <v-btn flat>Link One</v-btn>
-                <v-btn flat>Link Two</v-btn>
-                <v-btn flat>Link Three</v-btn>
-            </v-toolbar-items>
-        </v-toolbar>  
-        <!-- <App></App> -->
     </div>  
     <div id="appanother"></div>
     <% if (!process.browser) { %>
@@ -33,8 +21,8 @@
         if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
       </script>
     <% } %>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script> 
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>  -->
     <!-- webpack builds are automatically injected -->
     <script>
             //var router = require('./router');
@@ -44,10 +32,10 @@
             //     //router //,
             //     //template: '<App/>'
             // }).$mount('#app')        
-            const vue = new Vue({
-                el: "#app"//,
-                //router
-            })
+            // const vue = new Vue({
+            //     el: "#app"//,
+            //     //router
+            // })
     </script>    
   </body>
 </html>

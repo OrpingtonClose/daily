@@ -4,11 +4,8 @@
       <v-card>
         <v-toolbar color="cyan" dark>
           <v-toolbar-side-icon></v-toolbar-side-icon>
-
           <v-toolbar-title>Inbox</v-toolbar-title>
-
           <v-spacer></v-spacer>
-
           <v-btn icon>
             <v-icon>search</v-icon>
           </v-btn>
@@ -16,29 +13,14 @@
 
         <v-list two-line>
           <template v-for="(item, index) in items">
-            <v-subheader
-              v-if="item.header"
-              :key="item.header"
-            >
+            <v-subheader v-if="item.header" :key="item.header">
               {{ item.header }}
             </v-subheader>
-
-            <v-divider
-              v-else-if="item.divider"
-              :key="index"
-              :inset="item.inset"
-            ></v-divider>
-
-            <v-list-tile
-              v-else
-              :key="item.title"
-              avatar
-              @click=""
-            >
+            <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
+            <v-list-tile v-else :key="item.title" avatar @click="">
               <v-list-tile-avatar>
                 <img :src="item.avatar">
               </v-list-tile-avatar>
-
               <v-list-tile-content>
                 <v-list-tile-title v-html="item.title"></v-list-tile-title>
                 <v-list-tile-sub-title v-html="item.subtitle"></v-list-tile-sub-title>
@@ -52,6 +34,9 @@
 </template>
 
 <script>
+  // import Vue from 'vue';
+  // import 'vuetify'; 
+  // Vue.use(Vuetify);
   export default {
     name: 'herp',
     data () {
@@ -84,5 +69,5 @@
 <!-- <style src="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons"></style> -->
 <!-- <style src="../../../node_modules/vuetify/dist/vuetify.css"></style>-->
 <style>
-   
+   @import url(https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons);
 </style>

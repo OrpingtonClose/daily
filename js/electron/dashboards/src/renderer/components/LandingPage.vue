@@ -1,5 +1,6 @@
 <template>
   <div id="wrapper">
+
     <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
     <main>
       <div class="left-side">
@@ -44,6 +45,7 @@
 </script>
 
 <style>
+
   @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 
   * {

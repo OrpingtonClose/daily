@@ -73,6 +73,7 @@ electron.app.on("ready", ()=>{
     setInterval(()=>{
         electron.Menu.setApplicationMenu(myMenu());
     }, 2000);
+    win.webContents.openDevTools()
     //myMenu[0].submenu[0].click();
 });
 electron.app.on("window-all-closed", electron.app.quit);
