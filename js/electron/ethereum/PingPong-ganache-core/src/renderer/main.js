@@ -10,7 +10,7 @@ Vue.config.productionTip = false
 
 import Vuetify from 'vuetify';
 import 'vuetify/dist/vuetify.min.css';
-
+import 'magic.css/magic.css';
 Vue.use(Vuetify);
 
 // import * as blockies from 'blockies';

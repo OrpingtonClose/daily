@@ -1,5 +1,10 @@
 <template>
-    <canvas ref="my-canvas"></canvas>
+    <!-- <v-tooltip bottom> -->
+        <!-- <template v-slot:activator="{ on }"> -->
+            <canvas ref="my-canvas"></canvas>
+        <!-- </template> -->
+        <!-- <span>{{from}}</span> -->
+    <!-- </v-tooltip> -->
 </template>
 
 <script>
@@ -82,9 +87,9 @@
     export default {
         name: 'identicon',
         props: {
-            identity: {
+            from: {
                 type: String,
-                required: true
+                default: () => Array.from(window.crypto.getRandomValues(new Uint32Array(4))).map(n=>n.toString(16)).join("")
             },
             size: {
                 type: Number,
@@ -98,7 +103,7 @@
             }
         },
         mounted() {            
-            drawOnCanvas(this.identity, this.size, this.scale, this.$refs["my-canvas"]);
+            drawOnCanvas(this.from, this.size, this.scale, this.$refs["my-canvas"]);
         }
     }
 </script>

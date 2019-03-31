@@ -1,32 +1,37 @@
 <template lang="pug">
-v-app(:dark="dark",standalone)
-    v-navigation-drawer(v-model='drawer',:mini-variant.sync="mini", permanent, persistent,:dark="dark")
-        .pa-3.text-xs-center(v-show="true")
-            div.display-2.py-4 Adminify
-            p {{'An admin dashboard based on Vuetify'}}
-            div(style="padding-left:5em")
-                v-switch(:label="(!dark ? 'Light' : 'Dark') + ' Theme'", v-model="dark", :dark="dark", hide-details)
-            div
-                v-btn(dark, tag="a", href="https://github.com/wxs77577/adminify", primary) 
-                    v-icon(left, dark) star
-                    span Github 
-        .pa-3.text-xs-center(v-show="mini")
-            .display-2 A
-    v-toolbar.darken-1(fixed,dark,:class="theme") 
-        v-toolbar-side-icon(dark, @click.native.stop='drawer = !drawer')
-        v-toolbar-title this is a title
+v-app(dark, standalone)
+    sidebar(v-on:new-owner="setNewOwner", :owner="currentOwner", :accounts="accounts")    
+    v-toolbar.darken-1(fixed,dark) 
+        v-toolbar-title ping pong
     main
-        v-container.pa-4(fluid,align-content-center)
-            .text-center
-                v-card
-                    v-card-text Molestiae ut quibusdam sit corrupti rem. In eos quis rem beatae temporibus itaque laudantium repellat. Qui ut atque nostrum qui quod dolore omnis ratione. Doloribus exercitationem doloremque ullam ex ex voluptas. Ipsum voluptatum qui repellendus est beatae rerum. Omnis reiciendis error aliquid aut quo neque totam. Et qui veniam aliquam temporibus enim corporis molestias deleniti. Est laudantium voluptatum cumque eveniet qui et ex. Id officiis culpa nam sit accusamus dignissimos. Labore velit quod sunt minima qui facilis quia minima. Repellendus repudiandae ipsum incidunt ducimus magnam voluptatem. Repudiandae porro optio aut vel est omnis beatae. Eligendi laboriosam et error voluptatem a ut quisquam similique. Iusto distinctio culpa fugiat facere et in. Commodi aspernatur officiis cum minus id aut. Voluptatem ipsum sit at nobis voluptates eum. Maxime delectus quae omnis voluptas aut. Non ab id voluptatem neque et quae ipsam ut. Omnis vel ut quas modi. Ab reprehenderit et magnam consequatur atque. Autem est aut ut. Ex eius aut sed rerum atque.
-    //- div
-    //-     div
-    //-         sidebar(v-on:new-owner="setNewOwner" :owner="currentOwner" :accounts="accounts")
-    //-     div
-    //-         identicon(identity="aaaaaaa")
-    //-         identicon(identity="aaaaaaa")
-    //-         identicon(identity="aaaaaaa")
+        v-container.pa-4(fluid,  align-content-center, style="min-height: calc(100vh - 64px - 56px);")
+            v-toolbar(flat)
+                v-list
+                    v-list-tile
+                        v-list-tile-title(class="title", style="overflow-y: hidden;") Ping Pong passes
+            v-list
+                v-list-tile(@click.prevent="", avatar, v-for="(event, i) in eventsPaginated", :key="i")
+                    v-list-tile-action(@click.prevent="")
+                        identicon(:from="event.from")
+                    v-list-tile-content
+                        v-list-tile-title 
+                            v-container
+                                v-layout(row wrap align-center, overflow-hidden)
+                                    v-flex.text-xs-left from: {{event.from.slice(0, 10)}} 
+                                    v-flex.text-xs-right to: {{event.to.slice(0, 10)}}    
+                                    
+                    v-list-tile-avatar
+                        identicon(:from="event.to")
+        .text-xs-center
+            v-bottom-sheet(persistent, inset, vaue=true)
+                v-list
+                    v-pagination(v-model="page",:length="totalPages")     
+        v-snackbar(v-model="snackbar", top)
+            v-container(bg fill-height grid-list-md text-xs-center)
+                v-layout(row wrap align-center)
+                    v-flex new Pong Owner: {{whatHappened[whatHappened.length-1].to.slice(0, 10)}}   <identicon scale="2" :from="whatHappened[whatHappened.length-1].to" />
+            //- .text-xs-center 
+            
 </template>
 
 <script>    
@@ -37,6 +42,19 @@ v-app(:dark="dark",standalone)
   export default {
     name: 'landing-page',
     components: { SystemInformation, Sidebar, Identicon },
+    computed: {
+        eventCount() {
+            return this.whatHappened.length;
+        },
+        totalPages() {
+            return Math.ceil(this.whatHappened.length / this.eventsPerPage);
+        },        
+        eventsPaginated() {
+            var start = (this.page - 1) * this.eventsPerPage;
+            var end = start + this.eventsPerPage;
+            return this.whatHappened.slice(start, end);
+        }
+    },
     methods: {
         setNewOwner(address) {
             var _this = this;
@@ -54,11 +72,9 @@ v-app(:dark="dark",standalone)
     },
     data() {
         return {
-            pageTitle: "this is a title",
-            dark: false,
-            theme: 'primary',
-            mini: false,
-            drawer: true,
+            page: 1,
+            eventsPerPage: 5,
+            snackbar: false,
             web3: undefined,
             accounts: [],
             pingPong: undefined,
@@ -115,13 +131,22 @@ v-app(:dark="dark",standalone)
                 var {from, to} = item.returnValues;
                 return {from, to};
             };
-            
+
+            var isAtLastPage = _this.page === Math.ceil(_this.whatHappened.length / _this.eventsPerPage); 
+
             if (Array.isArray(data)) {
                 _this.whatHappened += data.map(process);
             } else {
                 _this.whatHappened.push(process(data));
             }
-            
+            if (isAtLastPage) {
+                _this.page = Math.ceil(_this.whatHappened.length / _this.eventsPerPage);
+            }
+
+            _this.snackbar = false;
+            setTimeout(function(data) {
+                _this.snackbar = true;
+            }, 500);            
         });
       });
       
@@ -130,103 +155,8 @@ v-app(:dark="dark",standalone)
 </script>
 
 <style>
-  @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
-  /* main { */
-    /* width: 600px;  */
-    /* margin: 15px auto;  */
-    /* position: relative; */
-    /* z-index: 3000;  */
-    /* position: fixed; 
-    margin-left: 280px;        */
-      /* min-height: 50%; */
-      /* height: 100%;
-      margin-left: 30%; */
-  /* } */
-  /* main > div {
-    margin-right: 320px;
-    clear: both;
-    overflow: auto;
-    background: #1abc9c;
-    background: rgba(26,188,156, 0.4);
-    min-height: 600px;
-  }   */
-  /* * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  } */
-
-  /* body { font-family: 'Source Sans Pro', sans-serif; } */
-
-  /* #wrapper {
-    background:
-      radial-gradient(
-        ellipse at top left,
-        rgba(255, 255, 255, 1) 40%,
-        rgba(229, 229, 229, .9) 100%
-      );
-    height: 100vh;
-    padding: 60px 80px;
-    width: 100vw; 
-  }*/
-
-  /* #logo {
-    height: auto;
-    margin-bottom: 20px;
-    width: 420px;
-  }*/
-
-  /* main {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  main > div { flex-basis: 50%; } */
-
-  /* .left-side {
-    display: flex;
-    flex-direction: column;
-  } */
-
-  /* .welcome {
-    color: #555;
-    font-size: 23px;
-    margin-bottom: 10px;
-  }
-
-  .title {
-    color: #2c3e50;
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 6px;
-  }
-
-  .title.alt {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-
-  .doc p {
-    color: black;
-    margin-bottom: 10px;
-  }
-
-  .doc button {
-    font-size: .8em;
-    cursor: pointer;
-    outline: none;
-    padding: 0.75em 2em;
-    border-radius: 2em;
-    display: inline-block;
-    color: #fff;
-    background-color: #4fc08d;
-    transition: all 0.15s ease;
-    box-sizing: border-box;
-    border: 1px solid #4fc08d;
-  }
-
-  .doc button.alt {
-    color: #42b983;
-    background-color: transparent;
-  } */
+    @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+    .much_too_much_height {
+        min-height: calc(100vh - 64px - 56px);
+    }
 </style>
