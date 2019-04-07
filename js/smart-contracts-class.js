@@ -2,10 +2,11 @@ var Web3 = require("web3");
 var ganacheUi = "http://127.0.0.1:7545";
 var ganacheCli = "http://127.0.0.1:8545";
 var web3 = new Web3(ganacheUi);
+web3.isConnected()
 web3.transactionConfirmationBlocks = 1
-web3.transactionBlockTimeout = 5
-web3.transactionPollingTimeout = 10
-web3.clearSubscriptions
+web3.transactionBlockTimeout = 20
+web3.transactionPollingTimeout = 20
+web3.clearSubscriptions()
 var privateKeys = [
     "0x0000000000000000000000000000000000000000000000000000000000000001",
     "0x0000000000000000000000000000000000000000000000000000000000000002",
@@ -17,46 +18,31 @@ var pe;
 (async () => {
     var accounts = privateKeys.map(prv => web3.eth.accounts.privateKeyToAccount(prv));
     var initialAccounts = await web3.eth.getAccounts();
-    accounts.forEach(account => {
+    await Promise.all(accounts.map(async account => {
         var to = account.address;
-        pe = web3.eth.sendTransaction({
-            from: initialAccounts[1], to, value: web3.utils.toWei("10", "ether")
+        return web3.eth.sendTransaction({
+            from: initialAccounts[2], to, value: web3.utils.toWei("1", "ether")
         })
-        //.once('transactionHash', function(hash){
-            //console.log(hash);
+        // .once('transactionHash', function(hash){
+        //     console.log(hash);
         //    console.log('transactionHash');
         //    pe.off('error');
-        //})//.then(console.log).catch(console.error)
+        // }).promise
         // .once('receipt', function(receipt){
-        //     //console.log(receipt);
+        //     console.log(receipt);
         //     console.log('receipt');
         // })
-        .once('confirmation', function(confirmationNumber, receipt){ 
-            console.log(confirmationNumber);
-            console.log('confirmation');
-        }).then(console.log)
-//        await pe;
-        //.on('error', console.error)
-    });
-
-    // await Promise.all(accounts.map(async account => {
-    //     var to = account.address;
-    //     return web3.eth.sendTransaction({
-    //         from: initialAccounts[0], to, value: web3.utils.toWei("10", "ether")
-    //     });
-    // }))
-    console.log("passed!")
-    // for( account in accounts) {
-    //     var to = account.address;
-    //     await web3.eth.sendTransaction({
-    //         from: initialAccounts[0], to, value: web3.utils.toWei("10", "ether")
-    //     });
-    // };
-    // console.log( await Promise.all([accounts.map(a => a.address), initialAccounts].map(async accountGroup => {
-    //     return await Promise.all(accountGroup.map(async address => {
-    //         return {[`${address}`]: await web3.eth.getBalance(address)}
-    //     }))
-    // })));
+        // .once('confirmation', function(confirmationNumber, receipt){ 
+        //     console.log(confirmationNumber);
+        //     console.log('confirmation');
+        // })
+        // .on('error', console.error)
+    }));
+    console.log( await Promise.all([accounts.map(a => a.address), initialAccounts].map(async accountGroup => {
+        return await Promise.all(accountGroup.map(async address => {
+            return {[`${address}`]: await web3.eth.getBalance(address)}
+        }))
+    })));
 })();
 
 
