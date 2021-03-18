@@ -4,7 +4,7 @@ from confluent_kafka import Consumer, TopicPartition, Producer
 import sys
 import json
 
-conf = {  'bootstrap.servers': "pkc-lgwgm.eastus2.azure.confluent.cloud:9092", 
+conf = {  'bootstrap.servers': "...", 
                 'broker.version.fallback': '0.10.0.0',
                 'api.version.fallback.ms': 0,
                 'sasl.mechanisms': 'PLAIN',
