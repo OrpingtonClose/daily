@@ -4,11 +4,11 @@ import           Language.PlutusTx.Prelude
 import           Playground.Contract
 
 -- | A 'Contract' that logs a message.
-hello :: Contract BlockchainActions T.Text ()
-hello = logInfo @String "herp merp"
+-- hello :: Contract BlockchainActions T.Text ()
+-- hello = logInfo @String "herp merp"
 
 endpoints :: Contract BlockchainActions T.Text ()
-endpoints = hello
+endpoints = logInfo @String "no hello needed"
 
 mkSchemaDefinitions ''BlockchainActions
 
