@@ -63,6 +63,32 @@ infixr 5 .++
 EmptyList' .++ ys = ys
 (x :-: xs) .++ ys = x :-: (xs .++ ys)
 
+data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show, Eq, Read, Ord)
+
+singleton :: a -> Tree a
+singleton val = Node val EmptyTree EmptyTree
+
+treeInsert :: (Ord a) => a -> Tree a -> Tree a
+treeInsert a EmptyTree = singleton a
+treeInsert x (Node a left right) | x == a = Node x left right
+                                 | x > a = Node a (treeInsert x left) right
+                                 | x < a = Node a left (treeInsert x right)
+
+treeElem :: (Ord a) => a -> Tree a -> Bool
+treeElem x EmptyTree = False
+treeElem x (Node a left right) | a == x = True
+                               | a < x = treeElem x left
+                               | a > x = treeElem x right
+
+extractTree :: (Ord a) => a -> Tree a -> Tree a
+extractTree x EmptyTree = EmptyTree
+extractTree x (Node a left right) | a == x = Node a left right
+                                  | a < x = extractTree x left
+                                  | a > x = extractTree x right
+
+tree = foldr treeInsert EmptyTree [3, 65, 46, 33, 6, 7, 622, 4, 39, 1, 2]
+
+
 main = do
 --    putStrLn $ ([(*7),(+9)] <*> [1..8])
     let rec = nudge (Rectangle (Point 0.0 0.0) (Point 100.0 100.0))
@@ -88,3 +114,9 @@ main = do
     putStrLn $ show $ Cons 40111 $ Cons 4 $ Cons 43 $ Cons 44 $ Cons 40 $ Cons 4 (5 `Cons` EmptyList)
     putStrLn $ show $ 40111 :-: 4 :-: 43 :-:  44 :-:  40 :-:  4 :-: 5 :-:  EmptyList'
     putStrLn $ show $ (5 :-:  EmptyList') .++ (5 :-:  EmptyList')
+    putStrLn $ show $ foldr id [] $ map (:) [1..7]
+    putStrLn $ show $ tree
+    putStrLn $ show $ treeElem 7 tree
+    putStrLn $ show $ treeElem 0 tree
+    putStrLn $ show $ extractTree 7 tree
+    
