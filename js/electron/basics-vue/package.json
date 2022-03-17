@@ -11,7 +11,7 @@
   "dependencies": {
     "browserify": "^16.2.3",
     "electron": "^4.0.7",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "rxjs": "^6.4.0",
     "rxjs-compat": "^6.4.0",
     "vue-rx": "^6.1.0",
