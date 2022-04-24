@@ -1,34 +1,70 @@
 import numpy as np
-from matplotlib import pyplot as plt
-import matplotlib.animation as animation
 from scipy import signal
 from time import sleep
+from collections import deque
 
-def print_board(board):
-    bc = board.copy().astype("str")
-    bc[board.astype("bool")] = "x"
-    bc[~board.astype("bool")] = " "
-    print(np.append(bc, np.array([['\n']]*board.shape[0]), axis=1).astype(object).sum())
+class AsciiArt:
+    def hello(self):
+        print(r"""
+ .----------------.  .----------------.  .-----------------. .----------------. 
+| .--------------. || .--------------. || .--------------. || .--------------. |
+| |  ________    | || |     ____     | || | ____  _____  | || |  _________   | |
+| | |_   ___ `.  | || |   .'    `.   | || ||_   \|_   _| | || | |_   ___  |  | |
+| |   | |   `. \ | || |  /  .--.  \  | || |  |   \ | |   | || |   | |_  \_|  | |
+| |   | |    | | | || |  | |    | |  | || |  | |\ \| |   | || |   |  _|  _   | |
+| |  _| |___.' / | || |  \  `--'  /  | || | _| |_\   |_  | || |  _| |___/ |  | |
+| | |________.'  | || |   `.____.'   | || ||_____|\____| | || | |_________|  | |
+| |              | || |              | || |              | || |              | |
+| '--------------' || '--------------' || '--------------' || '--------------' |
+ '----------------'  '----------------'  '----------------'  '----------------' 
+            """)
 
-def make_step(board):
-    conv = np.ones((3, 3))
-    stay_alive = np.array([2, 3])
-    make_alive = np.array([3])
+class GameOfLifeBoard(np.ndarray, AsciiArt):
+    def __init__(self, *args, **kwargs):
+        self.fill(0)
+        self[:,self.shape[1]//2] = 1
+        self.kernel = np.ones((3, 3))
+        self.stay_alive = np.array([2, 3])
+        self.make_alive = np.array([3])        
 
-    sums = signal.convolve(board, conv, mode="same")
-    return ((board == 1) & (np.isin(sums, stay_alive)) | (board == 0) & (np.isin(sums, make_alive)))
+    def progress(self):
+        sums = signal.convolve(self, self.kernel, mode="same")
+        stay_alive = np.isin(sums, self.stay_alive)
+        is_alive_now = self == 1
+        stay_alive_result = is_alive_now & stay_alive
 
-def make_board():
-    height = 25
-    width = 100
-    board = np.zeros((height, width))
-    board[height//2] = 1
-    return board
+        make_alive = np.isin(sums, self.make_alive)
+        is_dead_now = self == 0
+        make_alive_result = is_dead_now & make_alive
 
-board = make_board()
-print_board(board)
+        alive_result = make_alive_result | stay_alive_result
 
-for _ in range(150):
-    board = make_step(board)
-    print_board(board)
+        self.fill(0)
+        self[alive_result] = 1
+
+    def print(self):
+        bc = self.copy().astype("str")
+        bc[self.astype("bool")] = "x"
+        bc[~self.astype("bool")] = " "
+        print(np.append(bc, np.array([['\n']]*self.shape[0]), axis=1).astype(object).sum())
+
+    @property
+    def alive(self):
+        return int(self.sum())
+#works only with 50 columns somehow
+c = GameOfLifeBoard((22, 51))
+q = deque()
+q.append(c.alive)
+while True:
+    c.progress()
+    c.print()
     sleep(0.5)
+    q.append(c.alive)
+    if len(q) == 10:
+      _ = q.popleft()
+      if len([n for n in q for m in q if n != m]) == 0:
+          break
+
+c.hello()
+
+
