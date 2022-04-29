@@ -1,0 +1,85 @@
+#https://numpy.org/devdocs/reference/arrays.nditer.html
+import numpy as np
+import hashlib
+from scipy import signal
+import inspect
+import matplotlib.animation as animation
+from matplotlib import pyplot as plt
+
+def show(npArr, separator=True, varnames=False):
+    bc = npArr.copy().astype("str")
+    bc[npArr.astype("bool")] = "x"
+    bc[~npArr.astype("bool")] = " "
+    bc = np.insert(bc, bc.shape[1], "\n", axis=1)
+    print(bc.astype(object).sum())
+    
+    if separator:
+        if bc.ndim > 1:
+            print("=" * bc.shape[1])
+        else:
+            print("=====")
+
+class GameOfLife:
+    def __init__(self):
+        self.rows = 200
+        self.cols = 500
+        self.kernel = np.ones((3, 3))
+        self.kernel[1,1] = 0
+        self.board = np.zeros((self.rows, self.cols))
+        self.board[:, self.cols//2] = 1
+        self.board[0] = 0
+        self.board[self.board.shape[0]-1] = 0
+        self.stay_alive = [2, 3]
+        self.make_alive = [3]
+        self.hashes = {}
+        self.show = lambda: show(self.board)
+        
+    def step(self):
+
+        new_board = np.zeros_like(self.board)
+        rows = [row for row in np.nditer(self.board.transpose().copy(), flags=['external_loop'], order="f")]
+    
+        for index, row in enumerate(rows):
+            
+            row_before = rows[index-1]            
+            row_main = rows[index]
+            row_after = rows[0] if len(rows) == (index + 1) else rows[index + 1]
+            row_with_neighbour = np.stack((row_before, row_main, row_after))
+
+            #show(row_with_neighbour)
+            hashed_row = hashlib.blake2s(row_with_neighbour).hexdigest()
+
+            if hashed_row in self.hashes:
+                new_board[index] = self.hashes[hashed_row]
+            else:
+                sums = signal.convolve(row_with_neighbour, self.kernel, mode="same")[1]
+                
+                stay_alive = np.isin(sums, self.stay_alive)
+                is_alive_now = row_main == 1
+                stay_alive_result = is_alive_now & stay_alive
+
+                make_alive = np.isin(sums, self.make_alive)
+                is_dead_now = row_main == 0
+                make_alive_result = is_dead_now & make_alive
+
+                alive_result = make_alive_result | stay_alive_result
+
+                new_board[index][alive_result] = 1
+
+                self.hashes[hashed_row] = new_board[index]
+
+        self.board = new_board
+
+if __name__ == "__main__":
+    from time import sleep
+    c = GameOfLife()
+    
+    fig = plt.figure()
+    plot = plt.imshow(c.board, cmap='Greys', interpolation='antialiased')
+    def showSteps(num):
+        c.step()
+        plot.set_array(c.board)
+        return plot
+
+    ani = animation.FuncAnimation(fig, showSteps, 5, interval=50, blit=False)
+    plt.show()
