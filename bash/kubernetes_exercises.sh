@@ -2,8 +2,10 @@ gcloud auth login
 PROJECT=$(gcloud projects list | awk 'FNR==2 {print $1}')
 gcloud config set project $PROJECT
 gcloud config set compute/zone europe-west1
-gcloud container clusters create kubia --num-nodes 2 --machine-type f1-micro
+gcloud container clusters create kubia --num-nodes 2 --machine-type e2-small
 gcloud container clusters get-credentials kubia
+
+gcloud services enable container.googleapis.com
 
 cat <<EOF | kubectl create -f -
 apiVersion: v1
