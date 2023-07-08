@@ -18,4 +18,5 @@ spark-submit --conf spark.executor.extraClassPath=sqlite-jdbc-3.42.0.0.jar --dri
 
 head herp.csv/part-00000-8aaf01bd-bcad-4fc3-9c23-dff01b241f10-c000.csv
 
-
+#sudo docker run -e "ACCEPT_EULA=Y" -e 'MSSQL_SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+#https://hub.docker.com/_/cassandra/
