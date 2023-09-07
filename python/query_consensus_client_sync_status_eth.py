@@ -11,14 +11,17 @@ def syn():
   click.echo(str(int(r.json()['data']['head_slot'])  +int( r.json()['data']['sync_distance'])))
 
 
-if __name__ == "__main__":
+def go():
   r = requests.get('http://127.0.0.1:3500/eth/v1/node/syncing')
   d = r.json()['data']
   head = int(d['head_slot'])
   distance = int(d['sync_distance'])
   al_blocks = head + distance
-  ratio = head / distance
-  click.echo("head block: {:_>30}".format(head))
-  click.echo("distance till end: {:_>30}".format(distance))
-  click.echo("total blocks: {:_>30}".format(al_blocks))
-  click.echo("ratio: {:_>30.2f}".format(ratio))
+  ratio = 1 if distance == 0 else head / distance
+  print("head block: {:_>30}".format(head))
+  print("distance till end: {:_>30}".format(distance))
+  print("total blocks: {:_>30}".format(al_blocks))
+  print("ratio: {:_>30.2f}".format(ratio))
+
+if __name__ == "__main__":
+  go()
