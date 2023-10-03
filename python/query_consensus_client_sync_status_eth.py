@@ -2,6 +2,7 @@ import fire
 import requests
 
 def consensus():
+  #curl --header "Content-Type: application/json"  http://localhost:3500/eth/v1/node/syncing | jq
   r = requests.get('http://127.0.0.1:3500/edth/v1/node/syncing')
   d = r.json()['data']
   head = int(d['head_slot'])
@@ -14,6 +15,7 @@ def consensus():
   print("ratio: {:_>30.2f}".format(ratio))
 
 def execution(t):
+    #curl http://localhost:8545   -X POST   -H "Content-Type: application/json"   -d '{"jsonrpc":"2.0","method":"eth_syncing","params": [],"id":1}' | jq
     import requests
     import re
     import time
