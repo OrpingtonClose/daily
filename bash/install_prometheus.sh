@@ -40,7 +40,6 @@ sudo systemctl enable prometheus
 sudo systemctl start prometheus
 sudo systemctl status prometheus
 
-
 #https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-grafana-on-ubuntu-20-04
 
 wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
@@ -49,6 +48,7 @@ sudo apt update
 sudo apt install grafana
 sudo systemctl start grafana-server
 sudo systemctl status grafana-server
+
 wget https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz
 tar xvfz node_exporter-*.tar.gz
 sudo mv node_exporter-1.5.0.linux-amd64/node_exporter /usr/local/bin
@@ -83,3 +83,5 @@ cat <<EOF | sudo tee -a /etc/prometheus/prometheus.yml
       - targets: ["localhost:9100"]
 EOF
 sudo systemctl restart prometheus
+
+
