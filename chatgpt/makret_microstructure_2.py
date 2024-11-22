@@ -25,13 +25,52 @@ class Market:
         self.env.process(self.run_time_ticks())
 
     def make_order(self, participant, order_type, price, quantity):
-        """Participant makes an order (buy or sell)."""
-        if order_type == 'buy':
+        """Participant makes an order (buy or sell) and matches it if possible."""
+        print(f"Order placed: {order_type} by {participant} for {quantity} at {price}")
+        
+        if order_type == "buy":
+            # Add to buy orders and attempt to match with existing sell orders
             self.buy_offers.append((price, quantity, participant))
             self.buy_offers.sort(reverse=True, key=lambda x: x[0])  # Sort by highest price
-        elif order_type == 'sell':
+            self.match_orders()
+        elif order_type == "sell":
+            # Add to sell orders and attempt to match with existing buy orders
             self.sell_offers.append((price, quantity, participant))
             self.sell_offers.sort(key=lambda x: x[0])  # Sort by lowest price
+            self.match_orders()
+
+    def match_orders(self):
+        """Match buy and sell orders."""
+        while self.buy_offers and self.sell_offers:
+            buy_price, buy_quantity, buy_participant = self.buy_offers[0]
+            sell_price, sell_quantity, sell_participant = self.sell_offers[0]
+
+            # Match only if the buy price >= sell price
+            if buy_price >= sell_price:
+                matched_quantity = min(buy_quantity, sell_quantity)
+                trade_price = (buy_price + sell_price) / 2  # Use the midpoint as the trade price
+
+                # Update participants' earnings
+                buy_participant.update_earnings("buy", trade_price, matched_quantity)
+                sell_participant.update_earnings("sell", trade_price, matched_quantity)
+
+                # Record the trade
+                self.trade_history.append((self.env.now, buy_participant, "buy", trade_price, matched_quantity))
+                self.trade_history.append((self.env.now, sell_participant, "sell", trade_price, matched_quantity))
+
+                # Adjust order quantities
+                if buy_quantity > matched_quantity:
+                    self.buy_offers[0] = (buy_price, buy_quantity - matched_quantity, buy_participant)
+                else:
+                    self.buy_offers.pop(0)
+
+                if sell_quantity > matched_quantity:
+                    self.sell_offers[0] = (sell_price, sell_quantity - matched_quantity, sell_participant)
+                else:
+                    self.sell_offers.pop(0)
+            else:
+                # No match possible, exit the loop
+                break
 
     def take_order(self, participant, order_type, quantity):
         """Participant takes an order (buy or sell)."""
@@ -99,7 +138,6 @@ class MarketParticipant:
             self.strategy(self, self.market, data)
 
     def update_earnings(self, order_type, price, quantity):
-        """Update earnings based on trade activity."""
         if order_type == "buy":
             self.capital -= price * quantity
             self.holdings += quantity
@@ -111,6 +149,8 @@ class MarketParticipant:
         # Calculate profit and store for plotting
         current_profit = self.earnings - (self.starting_capital + self.starting_assets * price)
         self.profit_over_time.append((self.market.env.now, current_profit))
+        print(f"Updated earnings for {self}: {self.profit_over_time[-1]}")
+
 
     def run_strategy(self):
         """Initiate the participant's strategy."""
@@ -127,59 +167,126 @@ def ico_strategy(participant, market):
 
 # Trader Strategies
 def institutional_strategy(participant, market, current_time):
-    if current_time % 10 == 0:
-        order_type = random.choice(["buy", "sell"])
-        price = random.randint(95, 105)
-        quantity = random.randint(50, 100)
-        market.make_order(participant, order_type, price, quantity)
+    """Institutional trader strategy based on capital and market price."""
+    # Fetch the current market price (use the last trade or a default price)
+    current_price = market.trade_history[-1][3] if market.trade_history else 100
+
+    # Decide whether to buy or sell
+    order_type = random.choice(["buy", "sell"])
+
+    if order_type == "buy":
+        # Calculate maximum affordable quantity
+        max_quantity = int(participant.capital / current_price)
+        if max_quantity > 0:
+            # Decide quantity to trade as a fraction of max affordable
+            quantity = random.randint(1, max_quantity)
+            market.make_order(participant, "buy", current_price * random.uniform(0.95, 1.05), quantity)
+            print(f"[{current_time}] Institutional trader made buy order: Price {current_price}, Quantity {quantity}")
+
+    elif order_type == "sell" and participant.holdings > 0:
+        # Decide quantity to trade as a fraction of holdings
+        quantity = random.randint(1, participant.holdings)
+        market.make_order(participant, "sell", current_price * random.uniform(0.95, 1.05), quantity)
+        print(f"[{current_time}] Institutional trader made sell order: Price {current_price}, Quantity {quantity}")
 
 
 def retail_strategy(participant, market, current_time):
-    if random.random() < 0.7:
-        order_type = random.choice(["buy", "sell"])
-        price = random.randint(90, 110)
-        quantity = random.randint(1, 5)
-        market.make_order(participant, order_type, price, quantity)
+    """Retail trader strategy based on capital, holdings, and market price."""
+    # Fetch the current market price (use the last trade or a default price)
+    current_price = market.trade_history[-1][3] if market.trade_history else 100
+
+    # Randomly decide whether to buy or sell
+    order_type = random.choice(["buy", "sell"])
+
+    if order_type == "buy" and participant.capital > 0:
+        # Calculate the maximum affordable quantity for a buy
+        max_quantity_buy = int(participant.capital / current_price)
+        if max_quantity_buy > 0:
+            # Retail traders tend to buy smaller amounts
+            quantity_buy = random.randint(1, min(max_quantity_buy, 5))  # Limit to smaller trades
+            price = current_price * random.uniform(0.98, 1.02)  # Retail orders near market price
+            market.make_order(participant, "buy", price, quantity_buy)
+            print(f"[{current_time}] Retail trader placed buy order: Price {price:.2f}, Quantity {quantity_buy}")
+
+    elif order_type == "sell" and participant.holdings > 0:
+        # Calculate the maximum quantity the participant can sell
+        max_quantity_sell = participant.holdings
+        quantity_sell = random.randint(1, min(max_quantity_sell, 5))  # Retail traders sell smaller amounts
+        price = current_price * random.uniform(0.98, 1.02)  # Retail orders near market price
+        market.make_order(participant, "sell", price, quantity_sell)
+        print(f"[{current_time}] Retail trader placed sell order: Price {price:.2f}, Quantity {quantity_sell}")
+
 
 
 def market_maker_strategy(participant, market, current_time):
-    if random.random() < 0.5:
-        order_type = random.choice(["buy", "sell"])
-        quantity = random.randint(1, 10)
-        market.take_order(participant, order_type, quantity)
-    else:
-        price = random.randint(98, 102)
-        quantity = random.randint(5, 15)
-        market.make_order(participant, "buy", price, quantity)
-        market.make_order(participant, "sell", price, quantity)
+    """Market maker strategy based on capital, holdings, and market price."""
+    # Fetch the current market price (use the last trade or a default price)
+    current_price = market.trade_history[-1][3] if market.trade_history else 100
+
+    # Spread settings for buy/sell orders relative to the market price
+    buy_price = current_price * random.uniform(0.97, 0.99)  # Slightly below market price
+    sell_price = current_price * random.uniform(1.01, 1.03)  # Slightly above market price
+
+    # Buy orders
+    if participant.capital > 0:
+        max_quantity_buy = int(participant.capital / buy_price)
+        if max_quantity_buy > 0:
+            quantity_buy = random.randint(1, max_quantity_buy)
+            market.make_order(participant, "buy", buy_price, quantity_buy)
+            print(f"[{current_time}] Market maker placed buy order: Price {buy_price:.2f}, Quantity {quantity_buy}")
+
+    # Sell orders
+    if participant.holdings > 0:
+        max_quantity_sell = participant.holdings
+        quantity_sell = random.randint(1, max_quantity_sell)
+        market.make_order(participant, "sell", sell_price, quantity_sell)
+        print(f"[{current_time}] Market maker placed sell order: Price {sell_price:.2f}, Quantity {quantity_sell}")
+
 
 
 # Simulation Setup
 env = simpy.Environment()
 market = Market.get_instance(env)
 
-# Participants
+# Participants with increased capital
 ico = MarketParticipant(env, initial_capital=0, initial_assets=10000)
 env.process(ico_strategy(ico, market))
 
-institutional_trader = MarketParticipant(env, initial_capital=50000, initial_assets=0, strategy=institutional_strategy)
-retail_trader = MarketParticipant(env, initial_capital=1000, initial_assets=0, strategy=retail_strategy)
-market_maker = MarketParticipant(env, initial_capital=20000, initial_assets=0, strategy=market_maker_strategy)
+institutional_trader = MarketParticipant(env, initial_capital=20000, initial_assets=0, strategy=institutional_strategy)
+retail_trader = MarketParticipant(env, initial_capital=5000, initial_assets=0, strategy=retail_strategy)
+market_maker = MarketParticipant(env, initial_capital=15000, initial_assets=0, strategy=market_maker_strategy)
 
 # Run the simulation
-env.run(until=1000)
+env.run(until=100)
+
+# Debugging: Print profit over time for each participant
+for participant in MarketParticipant.instances:
+    if participant != ico:  # Skip the ICO participant
+        print(f"{participant} profit over time: {participant.profit_over_time}")
 
 # Final Profit Over Time Graph
 plt.figure(figsize=(12, 6))
+
+# Iterate over all participants except the ICO
 for participant in MarketParticipant.instances:
-    if participant != ico:  # Ignore ICO participant
+    if participant != ico:  # Skip the ICO participant
         times = [entry[0] for entry in participant.profit_over_time]
         profits = [entry[1] for entry in participant.profit_over_time]
-        plt.plot(times, profits, label=f"Participant {MarketParticipant.instances.index(participant)}")
+        participant_type = "Institutional Trader" if participant.strategy == institutional_strategy else \
+                           "Retail Trader" if participant.strategy == retail_strategy else \
+                           "Market Maker"
+        plt.plot(times, profits, label=participant_type)
 
 plt.title("Participant Profits Over Time")
 plt.xlabel("Time")
 plt.ylabel("Profit")
-plt.legend(["Institutional Trader", "Retail Trader", "Market Maker"])
+plt.legend()
 plt.grid(True)
 plt.show()
+
+
+
+
+
+
+
