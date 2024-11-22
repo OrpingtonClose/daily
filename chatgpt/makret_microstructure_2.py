@@ -54,9 +54,14 @@ class Market:
                 buy_participant.update_earnings("buy", trade_price, matched_quantity)
                 sell_participant.update_earnings("sell", trade_price, matched_quantity)
 
-                # Record the trade
-                self.trade_history.append((self.env.now, buy_participant, "buy", trade_price, matched_quantity))
-                self.trade_history.append((self.env.now, sell_participant, "sell", trade_price, matched_quantity))
+                # Record the trade using participant names
+                self.trade_history.append({
+                    "time": self.env.now,
+                    "buyer": buy_participant.name,
+                    "seller": sell_participant.name,
+                    "price": trade_price,
+                    "quantity": matched_quantity
+                })
 
                 # Adjust order quantities
                 if buy_quantity > matched_quantity:
@@ -71,6 +76,7 @@ class Market:
             else:
                 # No match possible, exit the loop
                 break
+
 
     def take_order(self, participant, order_type, quantity):
         """Participant takes an order (buy or sell)."""
@@ -118,19 +124,23 @@ class MarketParticipant:
     """Market Participant Class"""
     instances = []  # Track all instances
 
-    def __init__(self, env, initial_capital, initial_assets, strategy: Callable = None):
+    def __init__(self, env, name, initial_capital, initial_assets, strategy=None):
         self.env = env
+        self.name = name  # Friendly name for the participant
         self.capital = initial_capital
-        self.holdings = initial_assets  # Quantity of asset held
-        self.earnings = initial_capital  # Earnings (initial capital + holdings' value)
-        self.starting_capital = initial_capital  # To calculate profit
-        self.starting_assets = initial_assets  # To calculate profit
-        self.profit_over_time = []  # Track profit for plotting
+        self.holdings = initial_assets
+        self.earnings = initial_capital
+        self.starting_capital = initial_capital
+        self.starting_assets = initial_assets
+        self.profit_over_time = []
         self.strategy = strategy
         self.market = Market.get_instance(env)
         if strategy:
             self.env.process(self.run_strategy())
         MarketParticipant.instances.append(self)
+
+    def __str__(self):
+        return self.name
 
     def handle_event(self, event_type, data):
         """Handle events from the market."""
@@ -159,17 +169,19 @@ class MarketParticipant:
 
 
 def ico_strategy(participant, market):
-    """ICO strategy: Continuously places sell orders."""
-    while True:
-        market.make_order(participant, "sell", price=100, quantity=10)
-        yield participant.env.timeout(1)  # Places a sell order every second
+    """ICO strategy: Place a single sell order for all assets at the start of the simulation."""
+    # Place an order for all assets
+    market.make_order(participant, "sell", price=100, quantity=participant.holdings)
+    print(f"ICO placed a sell order for all assets: {participant.holdings} at price 100")
+    # Yield once to comply with SimPy's process requirements
+    yield participant.env.timeout(0)
 
 
 # Trader Strategies
 def institutional_strategy(participant, market, current_time):
     """Institutional trader strategy based on capital and market price."""
     # Fetch the current market price (use the last trade or a default price)
-    current_price = market.trade_history[-1][3] if market.trade_history else 100
+    current_price = market.trade_history[-1]["price"] if market.trade_history else 100
 
     # Decide whether to buy or sell
     order_type = random.choice(["buy", "sell"])
@@ -193,7 +205,7 @@ def institutional_strategy(participant, market, current_time):
 def retail_strategy(participant, market, current_time):
     """Retail trader strategy based on capital, holdings, and market price."""
     # Fetch the current market price (use the last trade or a default price)
-    current_price = market.trade_history[-1][3] if market.trade_history else 100
+    current_price = market.trade_history[-1]["price"] if market.trade_history else 100
 
     # Randomly decide whether to buy or sell
     order_type = random.choice(["buy", "sell"])
@@ -221,7 +233,7 @@ def retail_strategy(participant, market, current_time):
 def market_maker_strategy(participant, market, current_time):
     """Market maker strategy based on capital, holdings, and market price."""
     # Fetch the current market price (use the last trade or a default price)
-    current_price = market.trade_history[-1][3] if market.trade_history else 100
+    current_price = market.trade_history[-1]["price"] if market.trade_history else 100
 
     # Spread settings for buy/sell orders relative to the market price
     buy_price = current_price * random.uniform(0.97, 0.99)  # Slightly below market price
@@ -248,13 +260,19 @@ def market_maker_strategy(participant, market, current_time):
 env = simpy.Environment()
 market = Market.get_instance(env)
 
-# Participants with increased capital
-ico = MarketParticipant(env, initial_capital=0, initial_assets=10000)
+# Create participants with friendly names
+ico = MarketParticipant(env, name="ICO", initial_capital=0, initial_assets=10000)
 env.process(ico_strategy(ico, market))
 
-institutional_trader = MarketParticipant(env, initial_capital=20000, initial_assets=0, strategy=institutional_strategy)
-retail_trader = MarketParticipant(env, initial_capital=5000, initial_assets=0, strategy=retail_strategy)
-market_maker = MarketParticipant(env, initial_capital=15000, initial_assets=0, strategy=market_maker_strategy)
+institutional_trader = MarketParticipant(env, 
+                                         name="Institutional Trader", 
+                                         initial_capital=50000, initial_assets=0, strategy=institutional_strategy)
+retail_trader = MarketParticipant(env, 
+                                  name="Retail Trader", 
+                                  initial_capital=10000, initial_assets=0, strategy=retail_strategy)
+market_maker = MarketParticipant(env, 
+                                 name="Market Maker", 
+                                 initial_capital=10000, initial_assets=0, strategy=market_maker_strategy)
 
 # Run the simulation
 env.run(until=100)
@@ -276,6 +294,26 @@ for participant in MarketParticipant.instances:
                            "Retail Trader" if participant.strategy == retail_strategy else \
                            "Market Maker"
         plt.plot(times, profits, label=participant_type)
+
+
+
+# Export trade data to a CSV file
+def export_trade_data(market):
+    """Export trade history to a CSV file."""
+    import pandas as pd
+    if not market.trade_history:
+        print("No trade data to export.")
+        return
+
+    # Convert trade history to a DataFrame
+    df = pd.DataFrame(market.trade_history)
+    filename = "trade_history.csv"
+    df.to_csv(filename, index=False)
+    print(f"Trade history exported to {filename}.")
+
+
+# Run after the simulation
+export_trade_data(market)
 
 plt.title("Participant Profits Over Time")
 plt.xlabel("Time")
